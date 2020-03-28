@@ -12,7 +12,9 @@
 
 @property (nonatomic, strong) dispatch_queue_t serialQueue;
 @property (nonatomic, strong) NSMutableArray<void (^)(float)> *progressHandlers;
+@property (nonatomic, strong) NSMutableArray<void (^)(NSError *)> *completionHandlers;
 @property (nonatomic, strong) NSMutableArray<NSURLSessionDownloadTask *> *downloadTasks;
+@property (nonatomic, strong) dispatch_queue_t callbackQueue;
 
 @end
 
@@ -24,6 +26,7 @@
         _serialQueue = dispatch_queue_create("FileDownLoadAdapterSerialQueue", DISPATCH_QUEUE_SERIAL);
         _downloadTasks = [[NSMutableArray alloc] init];
         _progressHandlers = [[NSMutableArray alloc] init];
+        _completionHandlers = [[NSMutableArray alloc] init];
     }
     return self;
 }
@@ -43,28 +46,28 @@
         return;
     }
     
-    if (progressHandlers) {
-        self.progressHandlers = [NSMutableArray arrayWithArray:progressHandlers];
-    }
-    
     dispatch_async(self.serialQueue, ^{
         dispatch_group_t dispatchGroup = dispatch_group_create();
+        
+        if (progressHandlers)
+            self.progressHandlers = [NSMutableArray arrayWithArray:progressHandlers];
+        
+        if (completionHandlers)
+            self.completionHandlers = [NSMutableArray arrayWithArray:completionHandlers];
+        
+        self.callbackQueue = dispatchQueue;
         
         for (int i = 0; i < files.count; i++) {
             dispatch_group_enter(dispatchGroup);
             
-            NSURLSession *session = [NSURLSession sharedSession];
+            NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+            configuration.timeoutIntervalForRequest = 30.0;
+            
+            NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
             NSURL *url = [NSURL URLWithString:files[i].url];
             NSURLRequest *request = [NSURLRequest requestWithURL:url];
             
-            NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithRequest:request completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
-                dispatch_async(dispatchQueue, ^{
-                    completionHandlers[i](error);
-                    
-                    dispatch_group_leave(dispatchGroup);
-                });
-            }];
-
+            NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithRequest:request];
             [self.downloadTasks addObject:downloadTask];
             [downloadTask resume];
         }
@@ -79,12 +82,20 @@
     float progress = (float)totalBytesWritten / totalBytesExpectedToWrite;
     
     if (taskIndex < self.progressHandlers.count) {
-        self.progressHandlers[taskIndex](progress);
+        dispatch_async(self.callbackQueue, ^{
+            self.progressHandlers[taskIndex](progress);
+        });
     }
 }
 
 - (void)URLSession:(nonnull NSURLSession *)session downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(nonnull NSURL *)location {
+    unsigned long taskIndex = [self.downloadTasks indexOfObject:downloadTask];
     
+    if (taskIndex < self.completionHandlers.count) {
+        dispatch_async(self.callbackQueue, ^{
+            self.completionHandlers[taskIndex](nil);
+        });
+    }
 }
 
 

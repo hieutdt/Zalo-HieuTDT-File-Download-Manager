@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *fileName;
 @property (nonatomic, strong) NSString *url;
 
+- (instancetype)initWithName:(NSString *)fileName url:(NSString *)url;
+
 @end
 
 NS_ASSUME_NONNULL_END

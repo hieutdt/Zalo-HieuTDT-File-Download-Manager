@@ -19,4 +19,13 @@
     return self;
 }
 
+- (instancetype)initWithName:(NSString *)fileName url:(NSString *)url {
+    self = [super init];
+    if (self) {
+        _fileName = fileName;
+        _url = url;
+    }
+    return self;
+}
+
 @end
