@@ -9,13 +9,19 @@
 /* Begin PBXBuildFile section */
 		0417EF26242DD0CA00587BE1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF25242DD0CA00587BE1 /* AppDelegate.m */; };
 		0417EF29242DD0CA00587BE1 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF28242DD0CA00587BE1 /* SceneDelegate.m */; };
-		0417EF2C242DD0CA00587BE1 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF2B242DD0CA00587BE1 /* ViewController.m */; };
-		0417EF2F242DD0CA00587BE1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0417EF2D242DD0CA00587BE1 /* Main.storyboard */; };
 		0417EF32242DD0CA00587BE1 /* Zalo_File_Download_Manager.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF30242DD0CA00587BE1 /* Zalo_File_Download_Manager.xcdatamodeld */; };
 		0417EF34242DD0CA00587BE1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0417EF33242DD0CA00587BE1 /* Assets.xcassets */; };
 		0417EF37242DD0CA00587BE1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0417EF35242DD0CA00587BE1 /* LaunchScreen.storyboard */; };
 		0417EF3A242DD0CA00587BE1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF39242DD0CA00587BE1 /* main.m */; };
 		0417EF44242DD0CA00587BE1 /* Zalo_File_Download_ManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF43242DD0CA00587BE1 /* Zalo_File_Download_ManagerTests.m */; };
+		0417EF55242DD15300587BE1 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF54242DD15300587BE1 /* MainViewController.m */; };
+		0417EF56242DD15300587BE1 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF54242DD15300587BE1 /* MainViewController.m */; };
+		0417EF67242DE7D600587BE1 /* FileDownloadAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF66242DE7D600587BE1 /* FileDownloadAdapter.m */; };
+		0417EF68242DE7D600587BE1 /* FileDownloadAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF66242DE7D600587BE1 /* FileDownloadAdapter.m */; };
+		0417EF6B242DE7E900587BE1 /* File.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF6A242DE7E900587BE1 /* File.m */; };
+		0417EF6C242DE7E900587BE1 /* File.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF6A242DE7E900587BE1 /* File.m */; };
+		0417EF6F242E165300587BE1 /* FileDownloadBusiness.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF6E242E165300587BE1 /* FileDownloadBusiness.m */; };
+		0417EF70242E165300587BE1 /* FileDownloadBusiness.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF6E242E165300587BE1 /* FileDownloadBusiness.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,9 +40,6 @@
 		0417EF25242DD0CA00587BE1 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		0417EF27242DD0CA00587BE1 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
 		0417EF28242DD0CA00587BE1 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
-		0417EF2A242DD0CA00587BE1 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		0417EF2B242DD0CA00587BE1 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		0417EF2E242DD0CA00587BE1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0417EF31242DD0CA00587BE1 /* Zalo_File_Download_Manager.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Zalo_File_Download_Manager.xcdatamodel; sourceTree = "<group>"; };
 		0417EF33242DD0CA00587BE1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0417EF36242DD0CA00587BE1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -45,6 +48,14 @@
 		0417EF3F242DD0CA00587BE1 /* Zalo-File Download ManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Zalo-File Download ManagerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0417EF43242DD0CA00587BE1 /* Zalo_File_Download_ManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Zalo_File_Download_ManagerTests.m; sourceTree = "<group>"; };
 		0417EF45242DD0CA00587BE1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0417EF53242DD15300587BE1 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
+		0417EF54242DD15300587BE1 /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
+		0417EF65242DE7D600587BE1 /* FileDownloadAdapter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadAdapter.h; sourceTree = "<group>"; };
+		0417EF66242DE7D600587BE1 /* FileDownloadAdapter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileDownloadAdapter.m; sourceTree = "<group>"; };
+		0417EF69242DE7E900587BE1 /* File.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = File.h; sourceTree = "<group>"; };
+		0417EF6A242DE7E900587BE1 /* File.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = File.m; sourceTree = "<group>"; };
+		0417EF6D242E165300587BE1 /* FileDownloadBusiness.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadBusiness.h; sourceTree = "<group>"; };
+		0417EF6E242E165300587BE1 /* FileDownloadBusiness.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileDownloadBusiness.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,13 +97,14 @@
 		0417EF23242DD0CA00587BE1 /* Zalo-File Download Manager */ = {
 			isa = PBXGroup;
 			children = (
+				0417EF4E242DD10C00587BE1 /* PressentationLayer */,
+				0417EF4F242DD11400587BE1 /* BusinessLayer */,
+				0417EF50242DD11A00587BE1 /* DataAccessLayer */,
+				0417EF57242DDF2800587BE1 /* Models */,
 				0417EF24242DD0CA00587BE1 /* AppDelegate.h */,
 				0417EF25242DD0CA00587BE1 /* AppDelegate.m */,
 				0417EF27242DD0CA00587BE1 /* SceneDelegate.h */,
 				0417EF28242DD0CA00587BE1 /* SceneDelegate.m */,
-				0417EF2A242DD0CA00587BE1 /* ViewController.h */,
-				0417EF2B242DD0CA00587BE1 /* ViewController.m */,
-				0417EF2D242DD0CA00587BE1 /* Main.storyboard */,
 				0417EF33242DD0CA00587BE1 /* Assets.xcassets */,
 				0417EF35242DD0CA00587BE1 /* LaunchScreen.storyboard */,
 				0417EF38242DD0CA00587BE1 /* Info.plist */,
@@ -109,6 +121,66 @@
 				0417EF45242DD0CA00587BE1 /* Info.plist */,
 			);
 			path = "Zalo-File Download ManagerTests";
+			sourceTree = "<group>";
+		};
+		0417EF4E242DD10C00587BE1 /* PressentationLayer */ = {
+			isa = PBXGroup;
+			children = (
+				0417EF52242DD13300587BE1 /* Screens */,
+				0417EF51242DD12C00587BE1 /* Fragments */,
+			);
+			path = PressentationLayer;
+			sourceTree = "<group>";
+		};
+		0417EF4F242DD11400587BE1 /* BusinessLayer */ = {
+			isa = PBXGroup;
+			children = (
+				0417EF6D242E165300587BE1 /* FileDownloadBusiness.h */,
+				0417EF6E242E165300587BE1 /* FileDownloadBusiness.m */,
+			);
+			path = BusinessLayer;
+			sourceTree = "<group>";
+		};
+		0417EF50242DD11A00587BE1 /* DataAccessLayer */ = {
+			isa = PBXGroup;
+			children = (
+				0417EF65242DE7D600587BE1 /* FileDownloadAdapter.h */,
+				0417EF66242DE7D600587BE1 /* FileDownloadAdapter.m */,
+			);
+			path = DataAccessLayer;
+			sourceTree = "<group>";
+		};
+		0417EF51242DD12C00587BE1 /* Fragments */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Fragments;
+			sourceTree = "<group>";
+		};
+		0417EF52242DD13300587BE1 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				0417EF53242DD15300587BE1 /* MainViewController.h */,
+				0417EF54242DD15300587BE1 /* MainViewController.m */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		0417EF57242DDF2800587BE1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0417EF58242DDF3300587BE1 /* Entities */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		0417EF58242DDF3300587BE1 /* Entities */ = {
+			isa = PBXGroup;
+			children = (
+				0417EF69242DE7E900587BE1 /* File.h */,
+				0417EF6A242DE7E900587BE1 /* File.m */,
+			);
+			path = Entities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -193,7 +265,6 @@
 			files = (
 				0417EF37242DD0CA00587BE1 /* LaunchScreen.storyboard in Resources */,
 				0417EF34242DD0CA00587BE1 /* Assets.xcassets in Resources */,
-				0417EF2F242DD0CA00587BE1 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -212,10 +283,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				0417EF3A242DD0CA00587BE1 /* main.m in Sources */,
-				0417EF2C242DD0CA00587BE1 /* ViewController.m in Sources */,
 				0417EF32242DD0CA00587BE1 /* Zalo_File_Download_Manager.xcdatamodeld in Sources */,
 				0417EF26242DD0CA00587BE1 /* AppDelegate.m in Sources */,
+				0417EF55242DD15300587BE1 /* MainViewController.m in Sources */,
 				0417EF29242DD0CA00587BE1 /* SceneDelegate.m in Sources */,
+				0417EF6F242E165300587BE1 /* FileDownloadBusiness.m in Sources */,
+				0417EF6B242DE7E900587BE1 /* File.m in Sources */,
+				0417EF67242DE7D600587BE1 /* FileDownloadAdapter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -224,6 +298,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				0417EF44242DD0CA00587BE1 /* Zalo_File_Download_ManagerTests.m in Sources */,
+				0417EF6C242DE7E900587BE1 /* File.m in Sources */,
+				0417EF70242E165300587BE1 /* FileDownloadBusiness.m in Sources */,
+				0417EF56242DD15300587BE1 /* MainViewController.m in Sources */,
+				0417EF68242DE7D600587BE1 /* FileDownloadAdapter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,14 +316,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		0417EF2D242DD0CA00587BE1 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				0417EF2E242DD0CA00587BE1 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		0417EF35242DD0CA00587BE1 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (

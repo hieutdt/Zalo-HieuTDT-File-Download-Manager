@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  MainViewController.h
 //  Zalo-File Download Manager
 //
 //  Created by Trần Đình Tôn Hiếu on 3/27/20.
@@ -8,8 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+NS_ASSUME_NONNULL_BEGIN
 
+@interface MainViewController : UIViewController
 
 @end
 
+NS_ASSUME_NONNULL_END
