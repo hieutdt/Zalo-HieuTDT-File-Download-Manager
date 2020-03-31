@@ -8,13 +8,16 @@
 
 #import "FileDownloadAdapter.h"
 
-@interface FileDownloadAdapter () <NSURLSessionDownloadDelegate>
+@interface FileDownloadAdapter ()
 
 @property (nonatomic, strong) dispatch_queue_t serialQueue;
-@property (nonatomic, strong) NSMutableArray<void (^)(float, unsigned long)> *progressHandlers;
-@property (nonatomic, strong) NSMutableArray<void (^)(NSError *, unsigned long)> *completionHandlers;
+
 @property (nonatomic, strong) NSMutableArray<NSURLSessionDownloadTask *> *downloadTasks;
-@property (nonatomic, strong) dispatch_queue_t callbackQueue;
+@property (nonatomic, strong) NSMutableDictionary<NSURLSessionDownloadTask *, dispatch_queue_t> *taskQueueDictionary;
+
+@property (nonatomic, strong) NSMutableArray<dispatch_queue_t> *dispatchQueues;
+@property (nonatomic, strong) NSMutableArray<void (^)(float, NSURLSessionDownloadTask *)> *progressHandlers;
+@property (nonatomic, strong) NSMutableArray<void (^)(NSError *, NSURLSessionDownloadTask *)> *completionHandlers;
 
 @end
 
@@ -27,6 +30,8 @@
         _downloadTasks = [[NSMutableArray alloc] init];
         _progressHandlers = [[NSMutableArray alloc] init];
         _completionHandlers = [[NSMutableArray alloc] init];
+        _dispatchQueues = [[NSMutableArray alloc] init];
+        _taskQueueDictionary = [[NSMutableDictionary alloc] init];
     }
     return self;
 }
@@ -41,34 +46,18 @@
     return sharedInstance;
 }
 
-- (void)downloadFiles:(NSArray<File *> *)files
-  withProgressHandler:(NSArray<void (^)(float, unsigned long)> *)progressHandlers
-    completionHandler:(NSArray<void (^)(NSError *error, unsigned long)> *) completionHandlers
-      onDispatchQueue:(dispatch_queue_t)dispatchQueue {
-    if (!files || !completionHandlers) {
-        return;
-    }
-    
+- (void)executeDownloadTasks:(NSArray<NSURLSessionDownloadTask *> *)downloadTasks withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue {
     dispatch_async(self.serialQueue, ^{
-        if (progressHandlers)
-            self.progressHandlers = [NSMutableArray arrayWithArray:progressHandlers];
+        [self.dispatchQueues addObject:dispatchQueue];
+        [self.progressHandlers addObject:progressHandler];
+        [self.completionHandlers addObject:completionHandler];
         
-        if (completionHandlers)
-            self.completionHandlers = [NSMutableArray arrayWithArray:completionHandlers];
-        
-        self.callbackQueue = dispatchQueue;
-        
-        for (int i = 0; i < files.count; i++) {
-            NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-            configuration.timeoutIntervalForRequest = 30.0;
+        for (int i = 0; i < downloadTasks.count; i++) {
+            [self.downloadTasks addObject:downloadTasks[i]];
+            [self.taskQueueDictionary setDictionary:@{downloadTasks[i] : dispatchQueue}];
             
-            NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
-            NSURL *url = [NSURL URLWithString:files[i].url];
-            NSURLRequest *request = [NSURLRequest requestWithURL:url];
-            
-            NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithRequest:request];
-            [self.downloadTasks addObject:downloadTask];
-            [downloadTask resume];
+            // Execute task
+            [downloadTasks[i] resume];
         }
     });
 }
@@ -102,9 +91,7 @@
     });
 }
 
-- (void)resumeDownloadTaskAtIndex:(int)index
-            withCompletionHandler:(void (^)(NSError * _Nonnull))completionHandler
-                  onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+- (void)resumeDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue {
     if (!completionHandler) {
         return;
     }
@@ -125,14 +112,17 @@
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
     @synchronized (self) {
-        unsigned long taskIndex = [self.downloadTasks indexOfObject:downloadTask];
+        dispatch_queue_t queue = [self.taskQueueDictionary objectForKey:downloadTask];
+        // This index is index use in queues, progressHandlers and completionHandlers;
+        unsigned long index = [self.dispatchQueues indexOfObject:queue];
+        
         float progress = (float)totalBytesWritten / totalBytesExpectedToWrite;
         progress = (int)(progress * 40);
         progress /= 40.0;
         
-        if (taskIndex < self.progressHandlers.count) {
-            dispatch_async(self.callbackQueue, ^{
-                self.progressHandlers[taskIndex](progress, taskIndex);
+        if (index < self.progressHandlers.count) {
+            dispatch_async(queue, ^{
+                self.progressHandlers[index](progress, downloadTask);
             });
         }
     }
@@ -140,16 +130,15 @@
 
 - (void)URLSession:(nonnull NSURLSession *)session downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(nonnull NSURL *)location {
     @synchronized (self) {
-        unsigned long taskIndex = [self.downloadTasks indexOfObject:downloadTask];
+        dispatch_queue_t queue = [self.taskQueueDictionary objectForKey:downloadTask];
+        unsigned long index = [self.dispatchQueues indexOfObject:queue];
         
-        NSLog(@"Task complete! %lu", taskIndex);
-        
-        if (taskIndex < self.completionHandlers.count) {
-            dispatch_async(self.callbackQueue, ^{
-                self.completionHandlers[taskIndex](nil, taskIndex);
+        if (index < self.completionHandlers.count) {
+            dispatch_async(queue, ^{
+                self.completionHandlers[index](nil, downloadTask);
                 
-//                [self.completionHandlers removeObjectAtIndex:taskIndex];
-//                [self.progressHandlers removeObjectAtIndex:taskIndex];
+//                [self.completionHandlers removeObjectAtIndex:index];
+//                [self.progressHandlers removeObjectAtIndex:index];
             });
         }
     }

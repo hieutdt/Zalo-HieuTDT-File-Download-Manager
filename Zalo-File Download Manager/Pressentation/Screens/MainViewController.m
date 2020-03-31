@@ -47,11 +47,6 @@
     __weak MainViewController *weakSelf = self;
     
     for (unsigned long i = 0; i < 10; i++) {
-        File *file = [[File alloc] initWithName:[NSString stringWithFormat:@"File %lu", i] url:@"http://ipv4.download.thinkbroadband.com/5MB.zip"];
-        [self.downloadFiles addObject:file];
-    }
-    
-    for (unsigned long i = 0; i < 10; i++) {
         [self.progressHandlers addObject:^(float progress, unsigned long index) {
             if (index < self.downloadFiles.count) {
                 if (progress <= weakSelf.downloadFiles[index].progress)
