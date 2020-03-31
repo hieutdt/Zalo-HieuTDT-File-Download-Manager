@@ -25,7 +25,8 @@
     return self;
 }
 
-- (void)downloadMultiFiles:(NSArray<File *> *)files withProgressHandlers:(NSArray<void (^)(float)> *)progressHandlers completionHandlers:(NSArray<void (^)(NSError *)> *)completionHandlers {
+
+- (void)downloadMultiFiles:(NSArray<File *> *)files withProgressHandlers:(NSArray<void (^)(float, unsigned long)> *)progressHandlers completionHandlers:(NSArray<void (^)(NSError *, unsigned long)> *)completionHandlers {
     if (!files || !completionHandlers) {
         return;
     }

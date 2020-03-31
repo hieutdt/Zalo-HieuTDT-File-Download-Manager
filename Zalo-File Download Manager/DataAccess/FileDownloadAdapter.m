@@ -11,8 +11,8 @@
 @interface FileDownloadAdapter () <NSURLSessionDownloadDelegate>
 
 @property (nonatomic, strong) dispatch_queue_t serialQueue;
-@property (nonatomic, strong) NSMutableArray<void (^)(float)> *progressHandlers;
-@property (nonatomic, strong) NSMutableArray<void (^)(NSError *)> *completionHandlers;
+@property (nonatomic, strong) NSMutableArray<void (^)(float, unsigned long)> *progressHandlers;
+@property (nonatomic, strong) NSMutableArray<void (^)(NSError *, unsigned long)> *completionHandlers;
 @property (nonatomic, strong) NSMutableArray<NSURLSessionDownloadTask *> *downloadTasks;
 @property (nonatomic, strong) dispatch_queue_t callbackQueue;
 
@@ -41,7 +41,7 @@
     return sharedInstance;
 }
 
-- (void)downloadFiles:(NSArray<File *> *)files withProgressHandler:(NSArray<void (^)(float)> *)progressHandlers completionHandler:(NSArray<void (^)(NSError *error)> *) completionHandlers onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+- (void)downloadFiles:(NSArray<File *> *)files withProgressHandler:(NSArray<void (^)(float, unsigned long)> *)progressHandlers completionHandler:(NSArray<void (^)(NSError *error, unsigned long)> *) completionHandlers onDispatchQueue:(dispatch_queue_t)dispatchQueue {
     if (!files || !completionHandlers) {
         return;
     }
@@ -78,23 +78,32 @@
 #pragma mark - NSURLSessionDownloadDelegateProtocol
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
-    unsigned long taskIndex = [self.downloadTasks indexOfObject:downloadTask];
-    float progress = (float)totalBytesWritten / totalBytesExpectedToWrite;
-    
-    if (taskIndex < self.progressHandlers.count) {
-        dispatch_async(self.callbackQueue, ^{
-            self.progressHandlers[taskIndex](progress);
-        });
+    @synchronized (self) {
+        unsigned long taskIndex = [self.downloadTasks indexOfObject:downloadTask];
+        float progress = (float)totalBytesWritten / totalBytesExpectedToWrite;
+        progress = (int)(progress * 20);
+        progress /= 20.0;
+        
+        if (taskIndex < self.progressHandlers.count) {
+            dispatch_async(self.callbackQueue, ^{
+                self.progressHandlers[taskIndex](progress, taskIndex);
+            });
+        }
     }
 }
 
 - (void)URLSession:(nonnull NSURLSession *)session downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(nonnull NSURL *)location {
-    unsigned long taskIndex = [self.downloadTasks indexOfObject:downloadTask];
-    
-    if (taskIndex < self.completionHandlers.count) {
-        dispatch_async(self.callbackQueue, ^{
-            self.completionHandlers[taskIndex](nil);
-        });
+    @synchronized (self) {
+        unsigned long taskIndex = [self.downloadTasks indexOfObject:downloadTask];
+        
+        if (taskIndex < self.completionHandlers.count) {
+            dispatch_async(self.callbackQueue, ^{
+                self.completionHandlers[taskIndex](nil, taskIndex);
+                
+                [self.completionHandlers removeObjectAtIndex:taskIndex];
+                [self.progressHandlers removeObjectAtIndex:taskIndex];
+            });
+        }
     }
 }
 

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "AppConsts.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) NSString *fileName;
 @property (nonatomic, strong) NSString *url;
+@property (nonatomic) FileDownloadState state;
+@property (nonatomic) float progress;
 
 - (instancetype)initWithName:(NSString *)fileName url:(NSString *)url;
 
