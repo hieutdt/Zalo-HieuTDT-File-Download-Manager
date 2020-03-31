@@ -40,13 +40,13 @@
 
     _fileDownloadBusiness = [[FileDownloadBusiness alloc] init];
     
-    _downloadFiles = [[NSMutableArray alloc] init];
+    _downloadFiles = [self.fileDownloadBusiness getDownloadFiles];
     _progressHandlers = [[NSMutableArray alloc] init];
     _completionHandlers = [[NSMutableArray alloc] init];
     
     __weak MainViewController *weakSelf = self;
     
-    for (unsigned long i = 0; i < 10; i++) {
+    for (unsigned long i = 0; i < self.downloadFiles.count; i++) {
         [self.progressHandlers addObject:^(float progress, unsigned long index) {
             if (index < self.downloadFiles.count) {
                 if (progress <= weakSelf.downloadFiles[index].progress)

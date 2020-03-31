@@ -43,9 +43,6 @@
 }
 
 - (void)downloadMultiFiles:(NSArray<File *> *)files withProgressHandlers:(NSArray<void (^)(float, unsigned long)> *)progressHandlers completionHandlers:(NSArray<void (^)(NSError *, unsigned long)> *)completionHandlers {
-#if DEBUG
-    assert(files.count == progressHandlers.count == completionHandlers.count);
-#endif
     
     if (!files || !completionHandlers || !progressHandlers) {
         return;

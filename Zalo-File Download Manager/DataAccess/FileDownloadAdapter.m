@@ -54,7 +54,7 @@
         
         for (int i = 0; i < downloadTasks.count; i++) {
             [self.downloadTasks addObject:downloadTasks[i]];
-            [self.taskQueueDictionary setDictionary:@{downloadTasks[i] : dispatchQueue}];
+            [self.taskQueueDictionary addEntriesFromDictionary:@{downloadTasks[i] : dispatchQueue}];
             
             // Execute task
             [downloadTasks[i] resume];
