@@ -75,6 +75,8 @@
                 weakSelf.downloadFiles[index].state = FileDownloadFinish;
                 weakSelf.downloadFiles[index].progress = 1;
                 
+                [weakSelf.viewModelsArray[index] updateByFile:weakSelf.downloadFiles[index]];
+                
                 // Update UI
                 dispatch_async(dispatch_get_main_queue(), ^{
                     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];

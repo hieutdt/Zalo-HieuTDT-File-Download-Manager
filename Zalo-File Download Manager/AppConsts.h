@@ -21,5 +21,7 @@ typedef NS_ENUM(NSInteger, FileDownloadState) {
 static int DOWNLOAD_CELL_HEADER_IMAGE_HEIGHT = 50;
 static int DOWNLOAD_CELL_HEADER_IMAGE_WIDTH = 50;
 
+static int ERROR_GET_RESUME_DATA_FAILED = 1;
+
 
 #endif /* AppConsts_h */

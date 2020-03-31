@@ -41,14 +41,15 @@
     return sharedInstance;
 }
 
-- (void)downloadFiles:(NSArray<File *> *)files withProgressHandler:(NSArray<void (^)(float, unsigned long)> *)progressHandlers completionHandler:(NSArray<void (^)(NSError *error, unsigned long)> *) completionHandlers onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+- (void)downloadFiles:(NSArray<File *> *)files
+  withProgressHandler:(NSArray<void (^)(float, unsigned long)> *)progressHandlers
+    completionHandler:(NSArray<void (^)(NSError *error, unsigned long)> *) completionHandlers
+      onDispatchQueue:(dispatch_queue_t)dispatchQueue {
     if (!files || !completionHandlers) {
         return;
     }
     
     dispatch_async(self.serialQueue, ^{
-        dispatch_group_t dispatchGroup = dispatch_group_create();
-        
         if (progressHandlers)
             self.progressHandlers = [NSMutableArray arrayWithArray:progressHandlers];
         
@@ -58,8 +59,6 @@
         self.callbackQueue = dispatchQueue;
         
         for (int i = 0; i < files.count; i++) {
-            dispatch_group_enter(dispatchGroup);
-            
             NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
             configuration.timeoutIntervalForRequest = 30.0;
             
@@ -74,6 +73,53 @@
     });
 }
 
+- (void)stopDownloadTaskAtIndex:(int)index
+          withCompletionHandler:(void (^)(NSError *error, NSData * resumeData))completionHandler
+                onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+    if (!completionHandler) {
+        return;
+    }
+    
+    if (index >= self.downloadTasks.count) {
+        return;
+    }
+    
+    dispatch_async(self.serialQueue, ^{
+        NSURLSessionDownloadTask *downloadTask = self.downloadTasks[index];
+        
+        [downloadTask cancelByProducingResumeData:^(NSData *resumeData) {
+            if (resumeData) {
+                dispatch_async(dispatchQueue, ^{
+                    completionHandler(nil, resumeData);
+                });
+            } else {
+                dispatch_async(dispatchQueue, ^{
+                    NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadAdapter" code:ERROR_GET_RESUME_DATA_FAILED userInfo:@{@"Tạm dừng download thất bại!": NSLocalizedDescriptionKey}];
+                    completionHandler(error, resumeData);
+                });
+            }
+        }];
+    });
+}
+
+- (void)resumeDownloadTaskAtIndex:(int)index
+            withCompletionHandler:(void (^)(NSError * _Nonnull))completionHandler
+                  onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+    if (!completionHandler) {
+        return;
+    }
+    
+    if (index >= self.downloadTasks.count) {
+        return;
+    }
+    
+    dispatch_async(self.serialQueue, ^{
+        NSURLSessionDownloadTask *downloadTask = self.downloadTasks[index];
+        
+        
+    });
+}
+
 
 #pragma mark - NSURLSessionDownloadDelegateProtocol
 
@@ -81,8 +127,8 @@
     @synchronized (self) {
         unsigned long taskIndex = [self.downloadTasks indexOfObject:downloadTask];
         float progress = (float)totalBytesWritten / totalBytesExpectedToWrite;
-        progress = (int)(progress * 20);
-        progress /= 20.0;
+        progress = (int)(progress * 40);
+        progress /= 40.0;
         
         if (taskIndex < self.progressHandlers.count) {
             dispatch_async(self.callbackQueue, ^{
@@ -96,12 +142,14 @@
     @synchronized (self) {
         unsigned long taskIndex = [self.downloadTasks indexOfObject:downloadTask];
         
+        NSLog(@"Task complete! %lu", taskIndex);
+        
         if (taskIndex < self.completionHandlers.count) {
             dispatch_async(self.callbackQueue, ^{
                 self.completionHandlers[taskIndex](nil, taskIndex);
                 
-                [self.completionHandlers removeObjectAtIndex:taskIndex];
-                [self.progressHandlers removeObjectAtIndex:taskIndex];
+//                [self.completionHandlers removeObjectAtIndex:taskIndex];
+//                [self.progressHandlers removeObjectAtIndex:taskIndex];
             });
         }
     }

@@ -12,6 +12,7 @@
 @interface FileDownloadBusiness ()
 
 @property (nonatomic, strong) dispatch_queue_t serialQueue;
+@property (nonatomic, strong) NSMutableArray<File *> *downloadFiles;
 
 @end
 
@@ -21,6 +22,7 @@
     self = [super init];
     if (self) {
         _serialQueue = dispatch_queue_create("FileDownloadBusinessSerialQueue", DISPATCH_QUEUE_SERIAL);
+        _downloadFiles = [[NSMutableArray alloc] init];
     }
     return self;
 }

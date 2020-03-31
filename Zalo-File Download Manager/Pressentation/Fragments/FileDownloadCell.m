@@ -18,6 +18,7 @@
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *stateLabel;
 @property (nonatomic, strong) UIProgressView *progressBar;
+@property (nonatomic, strong) UIButton *stopButton;
            
 @end
 
@@ -33,11 +34,13 @@
     _nameLabel = [[UILabel alloc] init];
     _stateLabel = [[UILabel alloc] init];
     _progressBar = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
+    _stopButton = [[UIButton alloc] init];
     
     [self.contentView addSubview:self.headerImageView];
     [self.contentView addSubview:self.nameLabel];
     [self.contentView addSubview:self.stateLabel];
     [self.contentView addSubview:self.progressBar];
+    [self.contentView addSubview:self.stopButton];
     
     self.headerImageView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.headerImageView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:10].active = YES;
@@ -62,6 +65,23 @@
     [self.progressBar.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
     [self.progressBar.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-10].active = YES;
     [self.progressBar setProgress:0 animated:NO];
+    
+    self.stopButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.stopButton.heightAnchor constraintEqualToConstant:40].active = YES;
+    [self.stopButton.widthAnchor constraintEqualToConstant:40].active = YES;
+    [self.stopButton.centerYAnchor constraintEqualToAnchor:self.headerImageView.centerYAnchor].active = YES;
+    [self.stopButton.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
+    [self.stopButton setImage:[UIImage imageNamed:@"pause"] forState:UIControlStateNormal];
+    [self.stopButton addTarget:self action:@selector(stopButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self setSelectionStyle:UITableViewCellSelectionStyleNone];
+}
+
+- (void)stopButtonTapped:(id)sender {
+    UIButton *senderButton = (UIButton *)sender;
+    UIView *cell = senderButton.superview.superview;
+    
+    
 }
 
 #pragma mark - NICellProtocol
@@ -88,10 +108,7 @@
     } else if (viewModel.state == FileDownloadCancel) {
         [self.stateLabel setText:@"Đã huỷ"];
     }
-    
-    [UIView animateWithDuration:0.5 animations:^{
-        [self.progressBar setProgress:viewModel.progress animated:YES];
-    }];
+    [self.progressBar setProgress:viewModel.progress];
     
     return YES;
 }

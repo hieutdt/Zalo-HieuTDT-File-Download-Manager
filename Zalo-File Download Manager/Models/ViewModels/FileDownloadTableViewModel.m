@@ -47,7 +47,7 @@
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSLog(@"Did select row at indexpath: %@", indexPath);
+    
 }
 
 @end

@@ -15,7 +15,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)instance;
 
-- (void)downloadFiles:(NSArray<File *> *)files withProgressHandler:(NSArray<void (^)(float)> *)progressHandlers completionHandler:(NSArray<void (^)(NSError *error)> *) completionHandlers onDispatchQueue:(dispatch_queue_t)dispatchQueue;
+- (void)downloadFiles:(NSArray<File *> *)files
+  withProgressHandler:(NSArray<void (^)(float, unsigned long)> *)progressHandlers
+    completionHandler:(NSArray<void (^)(NSError *error, unsigned long)> *) completionHandlers
+      onDispatchQueue:(dispatch_queue_t)dispatchQueue;
+
+- (void)stopDownloadTaskAtIndex:(int)index
+          withCompletionHandler:(void (^)(NSError *error, NSData *resumeData))completionHandler
+                onDispatchQueue:(dispatch_queue_t)dispatchQueue;
+
+- (void)resumeDownloadTaskAtIndex:(int)index
+            withCompletionHandler:(void (^)(NSError *))completionHandler
+                  onDispatchQueue:(dispatch_queue_t)dispatchQueue;
+
 
 @end
 
