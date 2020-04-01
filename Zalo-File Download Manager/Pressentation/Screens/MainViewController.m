@@ -143,7 +143,9 @@
             }
         }];
     } else if (self.downloadFiles[index].state == FileDownloadPause) {
-        
+        [self.fileDownloadBusiness resumeDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
+            
+        }];
     }
 }
 

@@ -8,6 +8,7 @@
 
 #import "FileDownloadBusiness.h"
 #import "FileDownloadAdapter.h"
+#import "DownloadDataCache.h"
 
 @interface FileDownloadBusiness ()
 
@@ -84,6 +85,33 @@
             if (error) {
                 completionHandler(error);
             } else {
+                [[DownloadDataCache instance] setData:resumeData forDownloadTask:downloadTask];
+                completionHandler(nil);
+            }
+        } onDispatchQueue:self.serialQueue];
+    });
+}
+
+- (void)resumeDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler {
+    if (!completionHandler)
+        return;
+    
+    if (index >= self.downloadTasks.count)
+        return;
+    
+    dispatch_async(self.serialQueue, ^{
+        //TODO: Get old progress handler, completion handler
+        NSURLSessionDownloadTask *oldDownloadTask = self.downloadTasks[index];
+        NSData *resumeData = [[DownloadDataCache instance] dataForDownloadTask:oldDownloadTask];
+        
+        NSURLSessionDownloadTask * newDownloadTask = [self downloadTaskByResumeData:resumeData];
+        
+        // TODO: Pass progress handler, completion handler and queue here
+        [[FileDownloadAdapter instance] resumeDownloadTask:newDownloadTask withCompletionHandler:^(NSError *error) {
+            if (error) {
+                completionHandler(error);
+            } else {
+                [[DownloadDataCache instance] removeDataForDownloadTask:oldDownloadTask];
                 completionHandler(nil);
             }
         } onDispatchQueue:self.serialQueue];
@@ -100,6 +128,16 @@
     
     NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithRequest:request];
     
+    return downloadTask;
+}
+
+- (NSURLSessionDownloadTask *)downloadTaskByResumeData:(NSData *)resumeData {
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    configuration.timeoutIntervalForRequest = 30.0;
+    
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:[FileDownloadAdapter instance] delegateQueue:nil];
+    
+    NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithResumeData:resumeData];
     return downloadTask;
 }
 

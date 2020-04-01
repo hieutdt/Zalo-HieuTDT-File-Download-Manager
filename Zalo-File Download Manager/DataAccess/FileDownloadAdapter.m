@@ -86,19 +86,15 @@
     });
 }
 
-- (void)resumeDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue {
-    if (!completionHandler) {
-        return;
-    }
-    
-    if (index >= self.downloadTasks.count) {
-        return;
-    }
-    
-    dispatch_async(self.serialQueue, ^{
-        NSURLSessionDownloadTask *downloadTask = self.downloadTasks[index];
-        
-    });
+- (void)resumeDownloadTask:(NSURLSessionDownloadTask *)downloadTask withResumeData:(NSData *)resumeData completionHandler:(void (^)(NSError *error))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+    if (!downloadTask || !completionHandler || !dispatchQueue)
+           return;
+       
+       dispatch_sync(self.serialQueue, ^{
+           NSLog(@"Resume downloadTask");
+           
+           [downloadTask resume];
+       });
 }
 
 

@@ -19,8 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)pauseDownloadTask:(NSURLSessionDownloadTask *)downloadTask withCompletionHandler:(void (^)(NSError *error, NSData *resumeData))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue;
 
-- (void)resumeDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue;
-
+- (void)resumeDownloadTask:(NSURLSessionDownloadTask *)downloadTask withResumeData:(NSData *)resumeData completionHandler:(void (^)(NSError *error))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue;
 
 @end
 
