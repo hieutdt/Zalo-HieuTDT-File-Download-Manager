@@ -7,6 +7,7 @@
 //
 
 #import "FileDownloadAdapter.h"
+#import "DownloadDataCache.h"
 
 @interface FileDownloadAdapter ()
 
@@ -62,24 +63,18 @@
     });
 }
 
-- (void)stopDownloadTaskAtIndex:(int)index
-          withCompletionHandler:(void (^)(NSError *error, NSData * resumeData))completionHandler
-                onDispatchQueue:(dispatch_queue_t)dispatchQueue {
-    if (!completionHandler) {
+- (void)pauseDownloadTask:(NSURLSessionDownloadTask *)downloadTask withCompletionHandler:(void (^)(NSError *error, NSData *resumeData))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+    if (!completionHandler || !downloadTask)
         return;
-    }
-    
-    if (index >= self.downloadTasks.count) {
-        return;
-    }
     
     dispatch_async(self.serialQueue, ^{
-        NSURLSessionDownloadTask *downloadTask = self.downloadTasks[index];
+        NSLog(@"Pause downloadTask");
         
-        [downloadTask cancelByProducingResumeData:^(NSData *resumeData) {
+        [downloadTask cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
             if (resumeData) {
                 dispatch_async(dispatchQueue, ^{
                     completionHandler(nil, resumeData);
+                    [[DownloadDataCache instance] setData:resumeData forDownloadTask:downloadTask];
                 });
             } else {
                 dispatch_async(dispatchQueue, ^{
@@ -103,7 +98,6 @@
     dispatch_async(self.serialQueue, ^{
         NSURLSessionDownloadTask *downloadTask = self.downloadTasks[index];
         
-        
     });
 }
 
@@ -113,12 +107,14 @@
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
     @synchronized (self) {
         dispatch_queue_t queue = [self.taskQueueDictionary objectForKey:downloadTask];
-        // This index is index use in queues, progressHandlers and completionHandlers;
+        // This index use in queues, progressHandlers and completionHandlers;
         unsigned long index = [self.dispatchQueues indexOfObject:queue];
         
         float progress = (float)totalBytesWritten / totalBytesExpectedToWrite;
         progress = (int)(progress * 40);
         progress /= 40.0;
+        
+        NSLog(@"Index: %lu progress: %f", index, progress);
         
         if (index < self.progressHandlers.count) {
             dispatch_async(queue, ^{
@@ -130,6 +126,8 @@
 
 - (void)URLSession:(nonnull NSURLSession *)session downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(nonnull NSURL *)location {
     @synchronized (self) {
+        NSLog(@"Download complete!");
+        
         dispatch_queue_t queue = [self.taskQueueDictionary objectForKey:downloadTask];
         unsigned long index = [self.dispatchQueues indexOfObject:queue];
         

@@ -12,13 +12,22 @@
 #import <UIKit/UIKit.h>
 
 #import "FileDownloadViewModel.h"
+#import "FileDownloadCell.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol FileDownloadTableViewModelDelegate <NSObject>
+
+- (void)pauseButtonTappedAtCell:(FileDownloadCell *)cell;
+
+@end
+
 @interface FileDownloadTableViewModel : NSObject
 
-@property (nonatomic, strong) NITableViewModel *dataSource;
-@property (nonatomic, strong) id<UITableViewDelegate> delegate;
+@property (nonatomic, strong) id<FileDownloadTableViewModelDelegate> delegate;
+
+@property (nonatomic, strong) NITableViewModel *tableViewDataSource;
+@property (nonatomic, strong) id<UITableViewDelegate> tableViewDelegate;
 
 - (instancetype)initWithListArray:(NSArray<FileDownloadViewModel *> *)array;
 

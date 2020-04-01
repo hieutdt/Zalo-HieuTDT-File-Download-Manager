@@ -13,8 +13,9 @@
 #import "FileDownloadBusiness.h"
 #import "FileDownloadTableViewModel.h"
 #import "FileDownloadViewModel.h"
+#import "AppConsts.h"
 
-@interface MainViewController () <UITableViewDelegate>
+@interface MainViewController () <UITableViewDelegate, FileDownloadTableViewModelDelegate>
 
 @property (nonatomic, strong) UIBarButtonItem *downloadBarButton;
 @property (nonatomic, strong) UITableView *tableView;
@@ -25,7 +26,6 @@
 @property (nonatomic, strong) NSMutableArray *progressHandlers;
 @property (nonatomic, strong) NSMutableArray *completionHandlers;
 
-@property (nonatomic, strong) NITableViewModel *dataSource;
 @property (nonatomic, strong) FileDownloadTableViewModel *tableViewModel;
 @property (nonatomic, strong) NSArray<FileDownloadViewModel *> *viewModelsArray;
 
@@ -49,9 +49,6 @@
     for (unsigned long i = 0; i < self.downloadFiles.count; i++) {
         [self.progressHandlers addObject:^(float progress, unsigned long index) {
             if (index < self.downloadFiles.count) {
-                if (progress <= weakSelf.downloadFiles[index].progress)
-                    return;
-                
                 weakSelf.downloadFiles[index].state = FileDownloading;
                 weakSelf.downloadFiles[index].progress = progress;
                 
@@ -98,11 +95,10 @@
     
     _viewModelsArray = [self getViewModelsFromFileEntities:self.downloadFiles];
     _tableViewModel = [[FileDownloadTableViewModel alloc] initWithListArray:self.viewModelsArray];
+    _tableViewModel.delegate = self;
     
-    _dataSource = _tableViewModel.dataSource;
-
-    _tableView.dataSource = _dataSource;
-    _tableView.delegate = _tableViewModel.delegate;
+    _tableView.dataSource = _tableViewModel.tableViewDataSource;
+    _tableView.delegate = _tableViewModel.tableViewDelegate;
 }
 
 - (NSArray<FileDownloadViewModel *> *)getViewModelsFromFileEntities:(NSArray<File *> *)files {
@@ -118,6 +114,37 @@
 
 - (void)downloadButtonTapped {
     [self.fileDownloadBusiness downloadMultiFiles:self.downloadFiles withProgressHandlers:self.progressHandlers completionHandlers:self.completionHandlers];
+}
+
+
+#pragma mark - FileDownloadTableViewModelDelegateProtocol
+
+- (void)pauseButtonTappedAtCell:(FileDownloadCell *)cell {
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    int index = (int)indexPath.row;
+    
+    if (index >= self.downloadFiles.count)
+        return;
+    
+    if (self.downloadFiles[index].state == FileDownloading) {
+        [self.fileDownloadBusiness pauseDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
+            if (!error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.downloadFiles[index].state = FileDownloadPause;
+                    self.viewModelsArray[index].state = FileDownloadPause;
+                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                });
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.downloadFiles[index].state = FileDownloadCancel;
+                    self.viewModelsArray[index].state = FileDownloadCancel;
+                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                });
+            }
+        }];
+    } else if (self.downloadFiles[index].state == FileDownloadPause) {
+        
+    }
 }
 
 @end

@@ -211,11 +211,11 @@
 		0417EF23242DD0CA00587BE1 /* Zalo-File Download Manager */ = {
 			isa = PBXGroup;
 			children = (
-				04F79D7D24336F6300517235 /* Helper */,
 				0417EF4E242DD10C00587BE1 /* Pressentation */,
 				0417EF4F242DD11400587BE1 /* Business */,
 				0417EF50242DD11A00587BE1 /* DataAccess */,
 				0417EF57242DDF2800587BE1 /* Models */,
+				04F79D7D24336F6300517235 /* Helper */,
 				043E165E24323C2C003CDE74 /* AppConsts.h */,
 				0417EF24242DD0CA00587BE1 /* AppDelegate.h */,
 				0417EF25242DD0CA00587BE1 /* AppDelegate.m */,

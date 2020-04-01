@@ -43,45 +43,47 @@
     [self.contentView addSubview:self.stopButton];
     
     self.headerImageView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.headerImageView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:10].active = YES;
+    [self.headerImageView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:15].active = YES;
     [self.headerImageView.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:15].active = YES;
     [self.headerImageView.heightAnchor constraintEqualToConstant:DOWNLOAD_CELL_HEADER_IMAGE_HEIGHT].active = YES;
     [self.headerImageView.widthAnchor constraintEqualToConstant:DOWNLOAD_CELL_HEADER_IMAGE_WIDTH].active = YES;
     
     self.nameLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [self.nameLabel.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:13].active = YES;
-    [self.nameLabel.leadingAnchor constraintEqualToAnchor:self.headerImageView.trailingAnchor constant:10].active = YES;
+    [self.nameLabel.leadingAnchor constraintEqualToAnchor:self.headerImageView.trailingAnchor constant:15].active = YES;
     [self.nameLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
-    self.nameLabel.font = [UIFont boldSystemFontOfSize:20];
+    self.nameLabel.font = [UIFont boldSystemFontOfSize:17];
     
     self.stateLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [self.stateLabel.topAnchor constraintEqualToAnchor:self.nameLabel.bottomAnchor constant:4].active = YES;
-    [self.stateLabel.leadingAnchor constraintEqualToAnchor:self.headerImageView.trailingAnchor constant:10].active = YES;
+    [self.stateLabel.leadingAnchor constraintEqualToAnchor:self.headerImageView.trailingAnchor constant:15].active = YES;
     [self.stateLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
+    self.stateLabel.font = [UIFont systemFontOfSize:13];
+    self.stateLabel.textColor = [UIColor darkGrayColor];
     
     self.progressBar.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.progressBar.topAnchor constraintEqualToAnchor:self.headerImageView.bottomAnchor constant:5].active = YES;
+    [self.progressBar.topAnchor constraintEqualToAnchor:self.headerImageView.bottomAnchor constant:8].active = YES;
     [self.progressBar.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:10].active = YES;
     [self.progressBar.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
     [self.progressBar.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-10].active = YES;
+    self.progressBar.tintColor = [UIColor systemGreenColor];
     [self.progressBar setProgress:0 animated:NO];
     
     self.stopButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.stopButton.heightAnchor constraintEqualToConstant:40].active = YES;
-    [self.stopButton.widthAnchor constraintEqualToConstant:40].active = YES;
+    [self.stopButton.heightAnchor constraintEqualToConstant:35].active = YES;
+    [self.stopButton.widthAnchor constraintEqualToConstant:35].active = YES;
     [self.stopButton.centerYAnchor constraintEqualToAnchor:self.headerImageView.centerYAnchor].active = YES;
     [self.stopButton.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
     [self.stopButton setImage:[UIImage imageNamed:@"pause"] forState:UIControlStateNormal];
-    [self.stopButton addTarget:self action:@selector(stopButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self.stopButton addTarget:self action:@selector(stopButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     
     [self setSelectionStyle:UITableViewCellSelectionStyleNone];
 }
 
-- (void)stopButtonTapped:(id)sender {
-    UIButton *senderButton = (UIButton *)sender;
-    UIView *cell = senderButton.superview.superview;
-    
-    
+- (void)stopButtonTapped {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(pauseButtonTappedInCell:)]) {
+        [self.delegate pauseButtonTappedInCell:self];
+    }
 }
 
 #pragma mark - NICellProtocol
@@ -101,13 +103,22 @@
     [self.nameLabel setText:viewModel.fileName];
     if (viewModel.state == FileDownloading) {
         [self.stateLabel setText:@"Đang tải"];
+        [self.stopButton setImage:[UIImage imageNamed:@"pause"] forState:UIControlStateNormal];
+        
     } else if (viewModel.state == FileDownloadFinish) {
         [self.stateLabel setText:@"Đã tải xong"];
-    } else if (viewModel.state == FileDownloadStop) {
+        self.stopButton.hidden = YES;
+        self.progressBar.hidden = YES;
+        self.stateLabel.textColor = [UIColor systemGreenColor];
+        
+    } else if (viewModel.state == FileDownloadPause) {
         [self.stateLabel setText:@"Tạm dừng"];
+        [self.stopButton setImage:[UIImage imageNamed:@"resume"] forState:UIControlStateNormal];
+        
     } else if (viewModel.state == FileDownloadCancel) {
         [self.stateLabel setText:@"Đã huỷ"];
     }
+    
     [self.progressBar setProgress:viewModel.progress];
     
     return YES;

@@ -13,13 +13,13 @@
 
 typedef NS_ENUM(NSInteger, FileDownloadState) {
     FileDownloading,
-    FileDownloadStop,
+    FileDownloadPause,
     FileDownloadCancel,
     FileDownloadFinish
 };
 
-static int DOWNLOAD_CELL_HEADER_IMAGE_HEIGHT = 50;
-static int DOWNLOAD_CELL_HEADER_IMAGE_WIDTH = 50;
+static int DOWNLOAD_CELL_HEADER_IMAGE_HEIGHT = 40;
+static int DOWNLOAD_CELL_HEADER_IMAGE_WIDTH = 40;
 
 static int ERROR_GET_RESUME_DATA_FAILED = 1;
 

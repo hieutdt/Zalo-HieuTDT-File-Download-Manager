@@ -12,6 +12,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface DownloadDataCache : NSObject
 
++ (instancetype)instance;
+
+- (NSData *)dataForDownloadTask:(NSURLSessionDownloadTask *)task;
+- (void)setData:(NSData *)resumeData forDownloadTask:(NSURLSessionDownloadTask *)task;
+- (void)removeDataForDownloadTask:(NSURLSessionDownloadTask *)task;
+- (void)removeAllDatas;
+
 @end
 
 NS_ASSUME_NONNULL_END

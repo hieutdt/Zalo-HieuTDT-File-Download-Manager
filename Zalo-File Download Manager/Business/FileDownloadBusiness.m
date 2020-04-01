@@ -20,7 +20,7 @@
 @implementation FileDownloadBusiness
 
 - (instancetype)init {
-    self = [self initWithDownloadFilesCount:10];
+    self = [self initWithDownloadFilesCount:5];
     return self;
 }
 
@@ -57,13 +57,34 @@
             unsigned long index = [self.downloadTasks indexOfObject:task];
             
             if (index < progressHandlers.count) {
-                progressHandlers[index](progress, index);
+                if (progress > files[index].progress)
+                    progressHandlers[index](progress, index);
             }
         } completionHandler:^(NSError *error, NSURLSessionDownloadTask *task) {
             unsigned long index = [self.downloadTasks indexOfObject:task];
             
             if (index < completionHandlers.count) {
                 completionHandlers[index](error, index);
+            }
+        } onDispatchQueue:self.serialQueue];
+    });
+}
+
+- (void)pauseDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler {
+    if (!completionHandler)
+        return;
+    
+    if (index >= self.downloadTasks.count)
+        return;
+    
+    dispatch_async(self.serialQueue, ^{
+        NSURLSessionDownloadTask *downloadTask = self.downloadTasks[index];
+        
+        [[FileDownloadAdapter instance] pauseDownloadTask:downloadTask withCompletionHandler:^(NSError *error, NSData *resumeData) {
+            if (error) {
+                completionHandler(error);
+            } else {
+                completionHandler(nil);
             }
         } onDispatchQueue:self.serialQueue];
     });
