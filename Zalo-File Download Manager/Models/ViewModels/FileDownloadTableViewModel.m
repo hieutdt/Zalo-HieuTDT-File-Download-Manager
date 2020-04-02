@@ -45,6 +45,7 @@
     return self;
 }
 
+
 #pragma mark - NITableViewModelDelegate
 
 - (nonnull UITableViewCell *)tableViewModel: (nonnull NITableViewModel *)tableViewModel cellForTableView: (nonnull UITableView *)tableView atIndexPath: (nonnull NSIndexPath *)indexPath withObject: (nonnull id)object {
@@ -53,11 +54,17 @@
     return cell;
 }
 
+
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSLog(@"Did select row!");
     
+    if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectRowAtIndexPath:)]) {
+        [self.delegate didSelectRowAtIndexPath:indexPath];
+    }
 }
+
 
 #pragma mark - FileDownloadCellDelegate
 

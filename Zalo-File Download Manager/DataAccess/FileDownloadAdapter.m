@@ -103,6 +103,28 @@
     });
 }
 
+- (void)cancelDownloadTask:(NSURLSessionDownloadTask *)downloadTask
+     withCompletionHandler:(void (^)(void))completionHandler
+           onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+    if (!downloadTask || !completionHandler || !dispatchQueue) {
+        return;
+    }
+    
+    dispatch_async(self.serialQueue, ^{
+        [downloadTask cancel];
+        
+        dispatch_queue_t queue = [self.taskQueueDictionary objectForKey:downloadTask];
+        unsigned long index = [self.dispatchQueues indexOfObject:queue];
+        
+        [self.downloadTasks removeObject:downloadTask];
+        [self.completionHandlers removeObjectAtIndex:index];
+        [self.progressHandlers removeObjectAtIndex:index];
+        [self.dispatchQueues removeObjectAtIndex:index];
+        [self.taskQueueDictionary removeObjectForKey:downloadTask];
+        
+        completionHandler();
+    });
+}
 
 #pragma mark - NSURLSessionDownloadDelegateProtocol
 
@@ -115,8 +137,6 @@
         float progress = (float)totalBytesWritten / totalBytesExpectedToWrite;
         progress = (int)(progress * 40);
         progress /= 40.0;
-        
-        NSLog(@"Index: %lu progress: %f", index, progress);
         
         if (index < self.progressHandlers.count) {
             dispatch_async(queue, ^{

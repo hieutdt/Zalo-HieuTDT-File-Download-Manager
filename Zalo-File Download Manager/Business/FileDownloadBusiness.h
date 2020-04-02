@@ -26,6 +26,12 @@ NS_ASSUME_NONNULL_BEGIN
           downloadCompleteHandler:(void(^)(NSError *, unsigned long))downloadCompleteHandler
           resumeCompletionHandler:(void (^)(NSError *))completionHandler;
 
+- (void)cancelDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler;
+
+- (void)retryDownloadFile:(File *)file atIndex:(int)index
+      withProgressHandler:(void (^)(float, unsigned long))progressHandler
+  downloadCompleteHandler:(void(^)(NSError *, unsigned long))completionHandler;
+
 - (NSMutableArray<File *> *)getDownloadFiles;
 
 @end

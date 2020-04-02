@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)pauseButtonTappedAtCell:(FileDownloadCell *)cell;
 
+- (void)didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
+
 @end
 
 @interface FileDownloadTableViewModel : NSObject

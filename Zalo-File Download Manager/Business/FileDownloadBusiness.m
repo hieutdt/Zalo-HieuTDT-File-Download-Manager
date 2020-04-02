@@ -125,6 +125,54 @@
     });
 }
 
+- (void)cancelDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler {
+    if (!completionHandler)
+        return;
+    
+    if (index >= self.downloadTasks.count)
+        return;
+    
+    dispatch_async(self.serialQueue, ^{
+        NSURLSessionDownloadTask *downloadTask = self.downloadTasks[index];
+        if (!downloadTask) {
+            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadBusiness" code:ERROR_GET_RESUME_DATA_FAILED userInfo:@{@"Tiếp tục download thất bại!": NSLocalizedDescriptionKey}];
+            completionHandler(error);
+        } else {
+            [[FileDownloadAdapter instance] cancelDownloadTask:downloadTask withCompletionHandler:^{
+                completionHandler(nil);
+            } onDispatchQueue:self.serialQueue];
+        }
+    });
+}
+
+- (void)retryDownloadFile:(File *)file atIndex:(int)index
+      withProgressHandler:(void (^)(float, unsigned long))progressHandler
+  downloadCompleteHandler:(void(^)(NSError *, unsigned long))completionHandler {
+    if (!completionHandler)
+            return;
+        
+    if (index >= self.downloadTasks.count)
+        return;
+    
+    dispatch_async(self.serialQueue, ^{
+        self.downloadTasks[index] = [self downloadTaskByFile:file];
+        
+        if (!self.downloadTasks[index]) {
+            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadBusiness" code:ERROR_GET_RESUME_DATA_FAILED userInfo:@{@"Download thất bại!": NSLocalizedDescriptionKey}];
+            completionHandler(error, index);
+        } else {
+            [[FileDownloadAdapter instance] executeDownloadTask:self.downloadTasks[index] withProgressHandler:^(float progress, NSURLSessionDownloadTask *downloadTask) {
+                if (progress > file.progress) {
+                    progressHandler(progress, index);
+                }
+            } completionHandler:^(NSError *error, NSURLSessionDownloadTask *downloadTask) {
+                completionHandler(error, index);
+            } onDispatchQueue:self.serialQueue];
+        }
+    });
+}
+
+
 #pragma mark - GenerateDownloadTask
 
 - (NSURLSessionDownloadTask *)downloadTaskByFile:(File *)file {

@@ -142,11 +142,14 @@
                 });
             }
         }];
+        
     } else if (self.downloadFiles[index].state == FileDownloadPause) {
         [self.fileDownloadBusiness resumeDownloadTaskAtIndex:index withProgressHandler:^(float progress, unsigned long index) {
             self.progressHandlers[index](progress, index);
+            
         } downloadCompleteHandler:^(NSError *error, unsigned long index) {
             self.completionHandlers[index](error, index);
+            
         } resumeCompletionHandler:^(NSError *error) {
             if (error) {
                 self.downloadFiles[index].state = FileDownloadCancel;
@@ -168,7 +171,47 @@
                 });
             }
         }];
+        
+    } else if (self.downloadFiles[index].state == FileDownloadCancel) {
+        // TODO: retry here
+        self.downloadFiles[index].state = FileDownloading;
+        self.downloadFiles[index].progress = 0;
+        [self.viewModelsArray[index] updateByFile:self.downloadFiles[index]];
+        // Update UI
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+            [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        });
+        
+        [self.fileDownloadBusiness retryDownloadFile:self.downloadFiles[index] atIndex:index withProgressHandler:self.progressHandlers[index] downloadCompleteHandler:self.completionHandlers[index]];
     }
+}
+
+- (void)didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Huỷ tải xuống" message:[NSString stringWithFormat:@"Bạn có muốn kết thúc tải xuống tập tin %@", self.downloadFiles[indexPath.row].fileName] preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction *acceptAction = [UIAlertAction actionWithTitle:@"Xác nhận" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+        int index = (int)indexPath.row;
+        [self.fileDownloadBusiness cancelDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
+            if (!error) {
+                self.downloadFiles[index].state = FileDownloadCancel;
+                self.viewModelsArray[index].state = FileDownloadCancel;
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                });
+            } else {
+                
+            }
+        }];
+        
+    }];
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Từ chối" style:UIAlertActionStyleCancel handler:nil];
+    
+    [alert addAction:acceptAction];
+    [alert addAction:cancelAction];
+    
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 @end

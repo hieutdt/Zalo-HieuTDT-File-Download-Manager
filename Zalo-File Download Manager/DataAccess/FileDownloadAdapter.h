@@ -30,6 +30,10 @@ NS_ASSUME_NONNULL_BEGIN
     withCompletionHandler:(void (^)(NSError *error, NSData *resumeData))completionHandler
           onDispatchQueue:(dispatch_queue_t)dispatchQueue;
 
+- (void)cancelDownloadTask:(NSURLSessionDownloadTask *)downloadTask
+     withCompletionHandler:(void (^)(void))completionHandler
+           onDispatchQueue:(dispatch_queue_t)dispatchQueue;
+
 @end
 
 NS_ASSUME_NONNULL_END

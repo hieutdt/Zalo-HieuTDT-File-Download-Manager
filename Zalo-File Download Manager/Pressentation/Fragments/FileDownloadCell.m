@@ -86,6 +86,13 @@
     }
 }
 
+- (void)prepareForReuse {
+    [super prepareForReuse];
+    [self.stateLabel setTextColor:[UIColor darkGrayColor]];
+    self.progressBar.hidden = NO;
+    self.stopButton.hidden = NO;
+}
+
 #pragma mark - NICellProtocol
 
 - (BOOL)shouldUpdateCellWithObject:(id)object {
@@ -117,6 +124,9 @@
         
     } else if (viewModel.state == FileDownloadCancel) {
         [self.stateLabel setText:@"Đã huỷ"];
+        self.stateLabel.textColor = [UIColor systemRedColor];
+        self.progressBar.hidden = YES;
+        [self.stopButton setImage:[UIImage imageNamed:@"retry"] forState:UIControlStateNormal];
     }
     
     [self.progressBar setProgress:viewModel.progress];
