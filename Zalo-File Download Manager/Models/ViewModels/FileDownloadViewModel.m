@@ -30,7 +30,10 @@
     return self;
 }
 
-- (instancetype)initWithFileName:(NSString *)fileName state:(FileDownloadState)state imageName:(NSString *)imageName totalBytes:(long long)totalBytes bytesWritten:(long long)bytesWritten {
+- (instancetype)initWithFileName:(NSString *)fileName
+                           state:(FileDownloadState)state imageName:(NSString *)imageName
+                      totalBytes:(long long)totalBytes
+                    bytesWritten:(long long)bytesWritten {
     self = [super init];
     if (self) {
         _fileName = fileName;

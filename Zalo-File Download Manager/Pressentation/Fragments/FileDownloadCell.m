@@ -121,10 +121,15 @@
         [self.stateLabel setText:@"Đã tải xong"];
         self.stopButton.hidden = YES;
         self.progressBar.hidden = YES;
-        self.stateLabel.textColor = [UIColor systemGreenColor];
+        self.stateLabel.textColor = [UIColor systemBlueColor];
         
     } else if (viewModel.state == FileDownloadPause) {
-        [self.stateLabel setText:@"Tạm dừng"];
+        if (viewModel.totalBytes > 0) {
+            [self.stateLabel setText:[NSString stringWithFormat:@"Tạm dừng (%.1f MB/%.1f MB)", viewModel.bytesWritten * 1.0 / (1024 * 1024),
+            viewModel.totalBytes * 1.0 / (1024 * 1024)]];
+        } else {
+            [self.stateLabel setText:@"Tạm dừng"];
+        }
         [self.stopButton setImage:[UIImage imageNamed:@"resume"] forState:UIControlStateNormal];
         
     } else if (viewModel.state == FileDownloadCancel) {

@@ -7,6 +7,7 @@
 //
 
 #import "DownloadDataCache.h"
+#import "AppConsts.h"
 
 @interface DownloadDataCache ()
 
@@ -20,7 +21,7 @@
     self = [super init];
     if (self) {
         _dataCache = [[NSCache alloc] init];
-        _dataCache.countLimit = 10;
+        _dataCache.countLimit = DOWNLOAD_DATA_CACHE_SIZE;
     }
     return self;
 }

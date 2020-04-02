@@ -53,7 +53,10 @@
 
 #pragma mark - NITableViewModelDelegate
 
-- (nonnull UITableViewCell *)tableViewModel: (nonnull NITableViewModel *)tableViewModel cellForTableView: (nonnull UITableView *)tableView atIndexPath: (nonnull NSIndexPath *)indexPath withObject: (nonnull id)object {
+- (nonnull UITableViewCell *)tableViewModel: (nonnull NITableViewModel *)tableViewModel
+                           cellForTableView: (nonnull UITableView *)tableView
+                                atIndexPath: (nonnull NSIndexPath *)indexPath
+                                 withObject: (nonnull id)object {
     FileDownloadCell *cell = (FileDownloadCell *)[NICellFactory tableViewModel:tableViewModel cellForTableView:tableView atIndexPath:indexPath withObject:object];
     cell.delegate = self;
     return cell;
@@ -72,8 +75,9 @@
 
 - (void)pauseButtonTappedInCell:(UIView *)cell {
     if (!cell) {
-        NSLog(@"DIT ME CELL = null kia cha");
+        return;
     }
+    
     if (self.delegate && [self.delegate respondsToSelector:@selector(pauseButtonTappedAtCell:)]) {
         [self.delegate pauseButtonTappedAtCell:(FileDownloadCell *)cell];
     }

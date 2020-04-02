@@ -153,6 +153,7 @@
     if (!cell)
         return;
     
+    // BUG: this indexPath maybe wrong
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
     if (!indexPath)
         return;

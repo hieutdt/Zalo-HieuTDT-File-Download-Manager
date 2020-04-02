@@ -25,5 +25,7 @@ static int DOWNLOAD_CELL_HEADER_IMAGE_WIDTH = 40;
 
 static int ERROR_GET_RESUME_DATA_FAILED = 1;
 
+static int DOWNLOAD_DATA_CACHE_SIZE = 10;
+
 
 #endif /* AppConsts_h */
