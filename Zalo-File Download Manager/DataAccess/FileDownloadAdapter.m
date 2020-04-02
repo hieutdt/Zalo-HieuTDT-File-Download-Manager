@@ -84,8 +84,6 @@
         return;
     
     dispatch_async(self.serialQueue, ^{
-        NSLog(@"Pause downloadTask");
-        
         [downloadTask cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
             if (resumeData) {
                 dispatch_async(dispatchQueue, ^{

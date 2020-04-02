@@ -22,6 +22,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
+- (void)scrollViewDidBeginScroll;
+
+- (void)scrollViewDidEndScroll;
+
 @end
 
 @interface FileDownloadTableViewModel : NSObject

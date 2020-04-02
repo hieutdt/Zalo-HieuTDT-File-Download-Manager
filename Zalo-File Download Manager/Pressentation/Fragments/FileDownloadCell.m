@@ -66,7 +66,7 @@
     [self.progressBar.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:10].active = YES;
     [self.progressBar.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
     [self.progressBar.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-10].active = YES;
-    self.progressBar.tintColor = [UIColor systemGreenColor];
+    self.progressBar.tintColor = [UIColor systemBlueColor];
     [self.progressBar setProgress:0 animated:NO];
     
     self.stopButton.translatesAutoresizingMaskIntoConstraints = NO;

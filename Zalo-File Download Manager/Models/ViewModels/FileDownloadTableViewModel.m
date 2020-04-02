@@ -12,7 +12,9 @@
 #import "FileDownloadViewModel.h"
 #import "FileDownloadCell.h"
 
-@interface FileDownloadTableViewModel () <NITableViewModelDelegate, UITableViewDelegate, FileDownloadCellDelegate>
+@interface FileDownloadTableViewModel () <NITableViewModelDelegate, UITableViewDelegate, FileDownloadCellDelegate, UIScrollViewDelegate>
+
+@property (nonatomic) BOOL isScrolling;
 
 @end
 
@@ -23,6 +25,7 @@
     if (self) {
         _tableViewDelegate = self;
         _tableViewDataSource = [[NITableViewModel alloc] initWithDelegate:self];
+        _isScrolling = NO;
     }
     return self;
 }
@@ -32,6 +35,7 @@
     if (self) {
         _tableViewDelegate = self;
         _tableViewDataSource = [[NITableViewModel alloc] initWithListArray:array delegate:self];
+        _isScrolling = NO;
     }
     return self;
 }
@@ -41,6 +45,7 @@
     if (self) {
         _tableViewDelegate = self;
         _tableViewDataSource = [[NITableViewModel alloc] initWithSectionedArray:array delegate:self];
+        _isScrolling = NO;
     }
     return self;
 }
@@ -58,19 +63,33 @@
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSLog(@"Did select row!");
-    
     if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectRowAtIndexPath:)]) {
         [self.delegate didSelectRowAtIndexPath:indexPath];
     }
 }
 
-
 #pragma mark - FileDownloadCellDelegate
 
 - (void)pauseButtonTappedInCell:(UIView *)cell {
+    if (!cell) {
+        NSLog(@"DIT ME CELL = null kia cha");
+    }
     if (self.delegate && [self.delegate respondsToSelector:@selector(pauseButtonTappedAtCell:)]) {
         [self.delegate pauseButtonTappedAtCell:(FileDownloadCell *)cell];
+    }
+}
+
+#pragma mark - UIScrollViewDelegate
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(scrollViewDidBeginScroll)]) {
+        [self.delegate scrollViewDidBeginScroll];
+    }
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(scrollViewDidEndScroll)]) {
+        [self.delegate scrollViewDidEndScroll];
     }
 }
 

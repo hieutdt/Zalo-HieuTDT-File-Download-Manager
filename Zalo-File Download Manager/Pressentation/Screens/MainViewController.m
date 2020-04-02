@@ -15,7 +15,7 @@
 #import "FileDownloadViewModel.h"
 #import "AppConsts.h"
 
-@interface MainViewController () <UITableViewDelegate, FileDownloadTableViewModelDelegate>
+@interface MainViewController () <UITableViewDelegate, FileDownloadTableViewModelDelegate, UIScrollViewDelegate>
 
 @property (nonatomic, strong) UIBarButtonItem *downloadBarButton;
 @property (nonatomic, strong) UITableView *tableView;
@@ -29,6 +29,8 @@
 @property (nonatomic, strong) FileDownloadTableViewModel *tableViewModel;
 @property (nonatomic, strong) NSArray<FileDownloadViewModel *> *viewModelsArray;
 
+@property (nonatomic) BOOL isScrolling;
+
 @end
 
 @implementation MainViewController
@@ -39,6 +41,8 @@
     _fileDownloadBusiness = [[FileDownloadBusiness alloc] init];
     _progressHandlers = [[NSMutableArray alloc] init];
     _completionHandlers = [[NSMutableArray alloc] init];
+    
+    _isScrolling = NO;
     
     [self initDownloadFilesWithCount:5];
     
@@ -79,6 +83,7 @@
     self.navigationItem.rightBarButtonItem = _downloadBarButton;
     
     _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    _tableView.tableFooterView = [[UIView alloc] init];
     [self.view addSubview:_tableView];
 }
 
@@ -105,12 +110,18 @@
     [_tableView reloadData];
     
     [self.fileDownloadBusiness downloadMultiFiles:self.downloadFiles withProgressHandlers:self.progressHandlers completionHandlers:self.completionHandlers];
+    
+    // Hide that download button after clicked
+    self.navigationItem.rightBarButtonItem = nil;
 }
 
 - (void)updateCellAtIndex:(int)index
                 withState:(FileDownloadState)state
              bytesWritten:(long long)bytesWritten
                totalBytes:(long long)totalBytes {
+    if (self.isScrolling)
+        return;
+    
     __weak MainViewController *weakSelf = self;
     
     if (index >= weakSelf.downloadFiles.count) {
@@ -122,20 +133,35 @@
     weakSelf.downloadFiles[index].totalBytes = totalBytes;
     [weakSelf.viewModelsArray[index] updateByFile:weakSelf.downloadFiles[index]];
     
+    if (self.isScrolling) {
+        return;
+    }
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        [UIView performWithoutAnimation:^{
+            [weakSelf.tableView beginUpdates];
+            [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            [weakSelf.tableView endUpdates];
+        }];
     });
 }
 
 #pragma mark - FileDownloadTableViewModelDelegateProtocol
 
 - (void)pauseButtonTappedAtCell:(FileDownloadCell *)cell {
-    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
-    int index = (int)indexPath.row;
+    if (!cell)
+        return;
     
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    if (!indexPath)
+        return;
+    
+    int index = (int)indexPath.row;
     if (index >= self.downloadFiles.count)
         return;
+    
+    NSLog(@"IndexPath: %@", indexPath);
     
     if (self.downloadFiles[index].state == FileDownloading) {
         // Pause or cancel if failed
@@ -188,6 +214,15 @@
     [alert addAction:cancelAction];
     
     [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)scrollViewDidBeginScroll {
+    self.isScrolling = YES;
+}
+
+- (void)scrollViewDidEndScroll {
+    self.isScrolling = NO;
+    [self.tableView reloadData];
 }
 
 @end
