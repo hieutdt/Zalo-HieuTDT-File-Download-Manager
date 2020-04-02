@@ -15,12 +15,13 @@ NS_ASSUME_NONNULL_BEGIN
 @interface FileDownloadViewModel : NSObject
 
 @property (nonatomic, strong) NSString *fileName;
-@property (nonatomic) float progress;
 @property (nonatomic) FileDownloadState state;
 @property (nonatomic, strong) NSString *imageName;
+@property (nonatomic) long long totalBytes;
+@property (nonatomic) long long bytesWritten;
 
 - (instancetype)initWithFile:(File *)file;
-- (instancetype)initWithFileName:(NSString *)fileName progress:(float)progress state:(FileDownloadState)state imageName:(NSString *)imageName;
+- (instancetype)initWithFileName:(NSString *)fileName state:(FileDownloadState)state imageName:(NSString *)imageName totalBytes:(long long)totalBytes bytesWritten:(long long)bytesWritten;
 
 - (void)updateByFile:(File *)file;
 

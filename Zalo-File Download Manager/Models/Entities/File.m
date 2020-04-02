@@ -15,6 +15,9 @@
     if (self) {
         _fileName = [[NSString alloc] init];
         _url = [[NSString alloc] init];
+        _state = FileDownloading;
+        _totalBytes = 0;
+        _bytesWritten = 0;
     }
     return self;
 }
@@ -24,6 +27,8 @@
     if (self) {
         _fileName = fileName;
         _url = url;
+        _state = FileDownloading;
+        _totalBytes = 0;
     }
     return self;
 }

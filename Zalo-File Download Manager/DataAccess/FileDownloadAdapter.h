@@ -16,13 +16,13 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)instance;
 
 - (void)executeDownloadTask:(NSURLSessionDownloadTask *)downloadTask
-        withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler
+        withProgressHandler:(void (^)(NSURLSessionDownloadTask *, long long, long long))progressHandler
           completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler
             onDispatchQueue:(dispatch_queue_t)dispatchQueue;
 
 
 - (void)executeDownloadTasks:(NSArray<NSURLSessionDownloadTask *> *)downloadTasks
-         withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler
+         withProgressHandler:(void (^)(NSURLSessionDownloadTask *, long long, long long))progressHandler
            completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler
              onDispatchQueue:(dispatch_queue_t)dispatchQueue;
 

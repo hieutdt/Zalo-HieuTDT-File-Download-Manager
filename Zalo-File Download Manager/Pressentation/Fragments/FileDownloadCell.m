@@ -109,7 +109,12 @@
     [self.headerImageView setImage:[UIImage imageNamed:viewModel.imageName]];
     [self.nameLabel setText:viewModel.fileName];
     if (viewModel.state == FileDownloading) {
-        [self.stateLabel setText:@"Đang tải"];
+        if (viewModel.totalBytes > 0) {
+            [self.stateLabel setText:[NSString stringWithFormat:@"Đang tải (%.1f MB/%.1f MB)", viewModel.bytesWritten * 1.0 / (1024 * 1024),
+                                      viewModel.totalBytes * 1.0 / (1024 * 1024)]];
+        } else {
+            [self.stateLabel setText:@"Đang tải"];
+        }
         [self.stopButton setImage:[UIImage imageNamed:@"pause"] forState:UIControlStateNormal];
         
     } else if (viewModel.state == FileDownloadFinish) {
@@ -129,7 +134,16 @@
         [self.stopButton setImage:[UIImage imageNamed:@"retry"] forState:UIControlStateNormal];
     }
     
-    [self.progressBar setProgress:viewModel.progress];
+    float progress = 0;
+    if (viewModel.totalBytes > 0) {
+        progress = (float)viewModel.bytesWritten / viewModel.totalBytes;
+        progress *= 40;
+        progress /= 40;
+    } else {
+        progress = 0;
+    }
+    
+    [self.progressBar setProgress:progress];
     
     return YES;
 }

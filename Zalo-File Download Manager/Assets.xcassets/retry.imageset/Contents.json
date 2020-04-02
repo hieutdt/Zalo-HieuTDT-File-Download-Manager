@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "icons8-reboot-100.png",
+      "filename" : "Replay-RoundedWhite-512.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "icons8-reboot-101.png",
+      "filename" : "Replay-RoundedWhite-513.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "icons8-reboot-102.png",
+      "filename" : "Replay-RoundedWhite-514.png",
       "scale" : "3x"
     }
   ],

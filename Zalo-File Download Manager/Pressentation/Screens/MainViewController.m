@@ -23,7 +23,7 @@
 @property (nonatomic, strong) FileDownloadBusiness *fileDownloadBusiness;
 
 @property (nonatomic, strong) NSMutableArray<File *> *downloadFiles;
-@property (nonatomic, strong) NSMutableArray<void (^)(float, unsigned long)> *progressHandlers;
+@property (nonatomic, strong) NSMutableArray<void (^)(unsigned long, long long, long long)> *progressHandlers;
 @property (nonatomic, strong) NSMutableArray<void (^)(NSError *, unsigned long)> *completionHandlers;
 
 @property (nonatomic, strong) FileDownloadTableViewModel *tableViewModel;
@@ -33,52 +33,40 @@
 
 @implementation MainViewController
 
-#pragma mark - Lifecycle
-
 - (void)viewDidLoad {
     [super viewDidLoad];
 
     _fileDownloadBusiness = [[FileDownloadBusiness alloc] init];
-    
-    _downloadFiles = [self.fileDownloadBusiness getDownloadFiles];
     _progressHandlers = [[NSMutableArray alloc] init];
     _completionHandlers = [[NSMutableArray alloc] init];
+    
+    [self initDownloadFilesWithCount:5];
     
     __weak MainViewController *weakSelf = self;
     
     for (unsigned long i = 0; i < self.downloadFiles.count; i++) {
-        [self.progressHandlers addObject:^(float progress, unsigned long index) {
+        [self.progressHandlers addObject:^(unsigned long index, long long bytesWritten, long long totalBytes) {
             if (index < self.downloadFiles.count) {
-                weakSelf.downloadFiles[index].state = FileDownloading;
-                weakSelf.downloadFiles[index].progress = progress;
-                
-                [weakSelf.viewModelsArray[index] updateByFile:weakSelf.downloadFiles[index]];
-                
-                // Update UI
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-                    [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                });
+                [weakSelf updateCellAtIndex:(int)index withState:FileDownloading bytesWritten:bytesWritten totalBytes:totalBytes];
             }
         }];
         
         [self.completionHandlers addObject:^(NSError *error, unsigned long index) {
             if (index < self.downloadFiles.count) {
-                weakSelf.downloadFiles[index].state = FileDownloadFinish;
-                weakSelf.downloadFiles[index].progress = 1;
-                
-                [weakSelf.viewModelsArray[index] updateByFile:weakSelf.downloadFiles[index]];
-                
-                // Update UI
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-                    [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                });
+                [weakSelf updateCellAtIndex:(int)index withState:FileDownloadFinish bytesWritten:weakSelf.downloadFiles[index].totalBytes totalBytes:weakSelf.downloadFiles[index].totalBytes];
             }
         }];
     }
     
     [self initAndLayoutView];
+}
+
+- (void)initDownloadFilesWithCount:(int)count {
+    _downloadFiles = [[NSMutableArray alloc] init];
+    for (int i = 0; i < count; i++) {
+        File *file = [[File alloc] initWithName:[NSString stringWithFormat:@"Tập tin %d", i + 1] url:googleDrive1GBFileUrl];
+        [_downloadFiles addObject:file];
+    }
 }
 
 - (void)initAndLayoutView {
@@ -92,13 +80,6 @@
     
     _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     [self.view addSubview:_tableView];
-    
-    _viewModelsArray = [self getViewModelsFromFileEntities:self.downloadFiles];
-    _tableViewModel = [[FileDownloadTableViewModel alloc] initWithListArray:self.viewModelsArray];
-    _tableViewModel.delegate = self;
-    
-    _tableView.dataSource = _tableViewModel.tableViewDataSource;
-    _tableView.delegate = _tableViewModel.tableViewDelegate;
 }
 
 - (NSArray<FileDownloadViewModel *> *)getViewModelsFromFileEntities:(NSArray<File *> *)files {
@@ -113,9 +94,39 @@
 }
 
 - (void)downloadButtonTapped {
+    _viewModelsArray = [self getViewModelsFromFileEntities:self.downloadFiles];
+    
+    _tableViewModel = [[FileDownloadTableViewModel alloc] initWithListArray:self.viewModelsArray];
+    _tableViewModel.delegate = self;
+    
+    _tableView.dataSource = _tableViewModel.tableViewDataSource;
+    _tableView.delegate = _tableViewModel.tableViewDelegate;
+    
+    [_tableView reloadData];
+    
     [self.fileDownloadBusiness downloadMultiFiles:self.downloadFiles withProgressHandlers:self.progressHandlers completionHandlers:self.completionHandlers];
 }
 
+- (void)updateCellAtIndex:(int)index
+                withState:(FileDownloadState)state
+             bytesWritten:(long long)bytesWritten
+               totalBytes:(long long)totalBytes {
+    __weak MainViewController *weakSelf = self;
+    
+    if (index >= weakSelf.downloadFiles.count) {
+        return;
+    }
+    
+    weakSelf.downloadFiles[index].state = state;
+    weakSelf.downloadFiles[index].bytesWritten = bytesWritten;
+    weakSelf.downloadFiles[index].totalBytes = totalBytes;
+    [weakSelf.viewModelsArray[index] updateByFile:weakSelf.downloadFiles[index]];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+        [weakSelf.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    });
+}
 
 #pragma mark - FileDownloadTableViewModelDelegateProtocol
 
@@ -127,61 +138,34 @@
         return;
     
     if (self.downloadFiles[index].state == FileDownloading) {
+        // Pause or cancel if failed
         [self.fileDownloadBusiness pauseDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
             if (!error) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.downloadFiles[index].state = FileDownloadPause;
-                    self.viewModelsArray[index].state = FileDownloadPause;
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                });
+                [self updateCellAtIndex:index withState:FileDownloadPause bytesWritten:self.downloadFiles[index].bytesWritten totalBytes:self.downloadFiles[index].totalBytes];
             } else {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.downloadFiles[index].state = FileDownloadCancel;
-                    self.viewModelsArray[index].state = FileDownloadCancel;
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                });
+                [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
             }
         }];
         
     } else if (self.downloadFiles[index].state == FileDownloadPause) {
-        [self.fileDownloadBusiness resumeDownloadTaskAtIndex:index withProgressHandler:^(float progress, unsigned long index) {
-            self.progressHandlers[index](progress, index);
+        // Resume
+        [self.fileDownloadBusiness resumeDownloadTaskAtIndex:index withProgressHandler:^(unsigned long index, long long bytesWritten, long long totalBytes) {
+            self.progressHandlers[index](index, bytesWritten, totalBytes);
             
         } downloadCompleteHandler:^(NSError *error, unsigned long index) {
             self.completionHandlers[index](error, index);
             
         } resumeCompletionHandler:^(NSError *error) {
             if (error) {
-                self.downloadFiles[index].state = FileDownloadCancel;
-                self.viewModelsArray[index].state = FileDownloadCancel;
-                
-                // Update UI
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                });
+                [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
             } else {
-                self.downloadFiles[index].state = FileDownloading;
-                self.viewModelsArray[index].state = FileDownloading;
-                
-                // Update UI
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                });
+                [self updateCellAtIndex:index withState:FileDownloading bytesWritten:self.downloadFiles[index].bytesWritten totalBytes:self.downloadFiles[index].totalBytes];
             }
         }];
         
     } else if (self.downloadFiles[index].state == FileDownloadCancel) {
-        // TODO: retry here
-        self.downloadFiles[index].state = FileDownloading;
-        self.downloadFiles[index].progress = 0;
-        [self.viewModelsArray[index] updateByFile:self.downloadFiles[index]];
-        // Update UI
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-            [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-        });
+        //Retry
+        [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
         
         [self.fileDownloadBusiness retryDownloadFile:self.downloadFiles[index] atIndex:index withProgressHandler:self.progressHandlers[index] downloadCompleteHandler:self.completionHandlers[index]];
     }
@@ -193,15 +177,7 @@
         int index = (int)indexPath.row;
         [self.fileDownloadBusiness cancelDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
             if (!error) {
-                self.downloadFiles[index].state = FileDownloadCancel;
-                self.viewModelsArray[index].state = FileDownloadCancel;
-                
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                });
-            } else {
-                
+                [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
             }
         }];
         

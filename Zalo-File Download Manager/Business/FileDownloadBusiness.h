@@ -16,23 +16,21 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithDownloadFilesCount:(int)count;
 
 - (void)downloadMultiFiles:(NSArray<File *> *)files
-      withProgressHandlers:(NSArray<void (^)(float, unsigned long)> *)progressHandlers
+      withProgressHandlers:(NSArray<void (^)(unsigned long, long long, long long)> *)progressHandlers
         completionHandlers:(NSArray<void (^)(NSError *, unsigned long)> *)completionHandlers;
 
 - (void)pauseDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler;
 
 - (void)resumeDownloadTaskAtIndex:(int)index
-              withProgressHandler:(void (^)(float, unsigned long))progressHandler
-          downloadCompleteHandler:(void(^)(NSError *, unsigned long))downloadCompleteHandler
+              withProgressHandler:(void (^)(unsigned long, long long, long long))progressHandler
+          downloadCompleteHandler:(void (^)(NSError *, unsigned long))downloadCompleteHandler
           resumeCompletionHandler:(void (^)(NSError *))completionHandler;
 
 - (void)cancelDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler;
 
 - (void)retryDownloadFile:(File *)file atIndex:(int)index
-      withProgressHandler:(void (^)(float, unsigned long))progressHandler
-  downloadCompleteHandler:(void(^)(NSError *, unsigned long))completionHandler;
-
-- (NSMutableArray<File *> *)getDownloadFiles;
+      withProgressHandler:(void (^)(unsigned long, long long, long long))progressHandler
+  downloadCompleteHandler:(void (^)(NSError *, unsigned long))completionHandler;
 
 @end
 

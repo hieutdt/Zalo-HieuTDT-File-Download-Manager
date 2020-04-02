@@ -16,7 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *fileName;
 @property (nonatomic, strong) NSString *url;
 @property (nonatomic) FileDownloadState state;
-@property (nonatomic) float progress;
+@property (nonatomic) long long totalBytes;
+@property (nonatomic) long long bytesWritten;
 
 - (instancetype)initWithName:(NSString *)fileName url:(NSString *)url;
 

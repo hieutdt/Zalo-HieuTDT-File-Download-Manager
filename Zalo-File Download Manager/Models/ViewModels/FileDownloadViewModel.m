@@ -22,20 +22,22 @@
     self = [super init];
     if (self) {
         _fileName = file.fileName;
-        _progress = file.progress;
         _state = file.state;
         _imageName = @"download";
+        _totalBytes = file.totalBytes;
+        _bytesWritten = file.bytesWritten;
     }
     return self;
 }
 
-- (instancetype)initWithFileName:(NSString *)fileName progress:(float)progress state:(FileDownloadState)state imageName:(NSString *)imageName {
+- (instancetype)initWithFileName:(NSString *)fileName state:(FileDownloadState)state imageName:(NSString *)imageName totalBytes:(long long)totalBytes bytesWritten:(long long)bytesWritten {
     self = [super init];
     if (self) {
         _fileName = fileName;
-        _progress = progress;
         _state = state;
-        _imageName = imageName;
+        _imageName = @"download";
+        _totalBytes = totalBytes;
+        _bytesWritten = bytesWritten;
     }
     return self;
 }
@@ -46,8 +48,9 @@
     }
     
     self.fileName = file.fileName;
-    self.progress = file.progress;
     self.state = file.state;
+    self.totalBytes = file.totalBytes;
+    self.bytesWritten = file.bytesWritten;
 }
 
 - (Class)cellClass {

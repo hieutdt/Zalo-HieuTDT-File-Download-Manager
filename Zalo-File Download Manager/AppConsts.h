@@ -18,6 +18,8 @@ typedef NS_ENUM(NSInteger, FileDownloadState) {
     FileDownloadFinish
 };
 
+static NSString *googleDrive1GBFileUrl = @"https://speed.hetzner.de/100MB.bin";
+
 static int DOWNLOAD_CELL_HEADER_IMAGE_HEIGHT = 40;
 static int DOWNLOAD_CELL_HEADER_IMAGE_WIDTH = 40;
 

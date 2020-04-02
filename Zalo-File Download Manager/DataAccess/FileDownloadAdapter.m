@@ -7,7 +7,6 @@
 //
 
 #import "FileDownloadAdapter.h"
-#import "DownloadDataCache.h"
 
 @interface FileDownloadAdapter ()
 
@@ -17,7 +16,7 @@
 @property (nonatomic, strong) NSMutableDictionary<NSURLSessionDownloadTask *, dispatch_queue_t> *taskQueueDictionary;
 
 @property (nonatomic, strong) NSMutableArray<dispatch_queue_t> *dispatchQueues;
-@property (nonatomic, strong) NSMutableArray<void (^)(float, NSURLSessionDownloadTask *)> *progressHandlers;
+@property (nonatomic, strong) NSMutableArray<void (^)(NSURLSessionDownloadTask *, long long, long long)> *progressHandlers;
 @property (nonatomic, strong) NSMutableArray<void (^)(NSError *, NSURLSessionDownloadTask *)> *completionHandlers;
 
 @end
@@ -48,7 +47,7 @@
 }
 
 - (void)executeDownloadTask:(NSURLSessionDownloadTask *)downloadTask
-        withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler
+        withProgressHandler:(void (^)(NSURLSessionDownloadTask *, long long, long long))progressHandler
           completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler
             onDispatchQueue:(dispatch_queue_t)dispatchQueue {
     if (!downloadTask || !progressHandler || !completionHandler || !dispatchQueue) {
@@ -67,7 +66,7 @@
 }
 
 - (void)executeDownloadTasks:(NSArray<NSURLSessionDownloadTask *> *)downloadTasks
-         withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler
+         withProgressHandler:(void (^)(NSURLSessionDownloadTask *, long long, long long))progressHandler
            completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler
              onDispatchQueue:(dispatch_queue_t)dispatchQueue {
     if (!downloadTasks || !progressHandler || !completionHandler || !dispatchQueue)
@@ -91,7 +90,6 @@
             if (resumeData) {
                 dispatch_async(dispatchQueue, ^{
                     completionHandler(nil, resumeData);
-                    [[DownloadDataCache instance] setData:resumeData forDownloadTask:downloadTask];
                 });
             } else {
                 dispatch_async(dispatchQueue, ^{
@@ -134,13 +132,9 @@
         // This index use in queues, progressHandlers and completionHandlers;
         unsigned long index = [self.dispatchQueues indexOfObject:queue];
         
-        float progress = (float)totalBytesWritten / totalBytesExpectedToWrite;
-        progress = (int)(progress * 40);
-        progress /= 40.0;
-        
         if (index < self.progressHandlers.count) {
             dispatch_async(queue, ^{
-                self.progressHandlers[index](progress, downloadTask);
+                self.progressHandlers[index](downloadTask, totalBytesWritten, totalBytesExpectedToWrite);
             });
         }
     }
@@ -156,9 +150,6 @@
         if (index < self.completionHandlers.count) {
             dispatch_async(queue, ^{
                 self.completionHandlers[index](nil, downloadTask);
-                
-//                [self.completionHandlers removeObjectAtIndex:index];
-//                [self.progressHandlers removeObjectAtIndex:index];
             });
         }
     }

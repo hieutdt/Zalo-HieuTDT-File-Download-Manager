@@ -13,38 +13,24 @@
 @interface FileDownloadBusiness ()
 
 @property (nonatomic, strong) dispatch_queue_t serialQueue;
-@property (nonatomic, strong) NSMutableArray<File *> *downloadFiles;
 @property (nonatomic, strong) NSMutableArray<NSURLSessionDownloadTask *> *downloadTasks;
 
 @end
 
 @implementation FileDownloadBusiness
 
-- (instancetype)init {
-    self = [self initWithDownloadFilesCount:5];
-    return self;
-}
-
-- (instancetype)initWithDownloadFilesCount:(int)count {
+- (instancetype)init
+{
     self = [super init];
     if (self) {
         _serialQueue = dispatch_queue_create("FileDownloadBusinessSerialQueue", DISPATCH_QUEUE_SERIAL);
         _downloadTasks = [[NSMutableArray alloc] init];
-        _downloadFiles = [[NSMutableArray alloc] init];
-        for (unsigned long i = 0; i < count; i++) {
-            File *file = [[File alloc] initWithName:[NSString stringWithFormat:@"File %lu", i] url:@"http://ipv4.download.thinkbroadband.com/5MB.zip"];
-            [_downloadFiles addObject:file];
-        }
     }
     return self;
 }
 
-- (NSMutableArray<File *> *)getDownloadFiles {
-    return self.downloadFiles;
-}
-
 - (void)downloadMultiFiles:(NSArray<File *> *)files
-      withProgressHandlers:(NSArray<void (^)(float, unsigned long)> *)progressHandlers
+      withProgressHandlers:(NSArray<void (^)(unsigned long, long long, long long)> *)progressHandlers
         completionHandlers:(NSArray<void (^)(NSError *, unsigned long)> *)completionHandlers {
     
     if (!files || !completionHandlers || !progressHandlers) {
@@ -56,12 +42,11 @@
             [self.downloadTasks addObject:[self downloadTaskByFile:files[i]]];
         }
         
-        [[FileDownloadAdapter instance] executeDownloadTasks:self.downloadTasks withProgressHandler:^(float progress, NSURLSessionDownloadTask *task) {
+        [[FileDownloadAdapter instance] executeDownloadTasks:self.downloadTasks withProgressHandler:^(NSURLSessionDownloadTask *task, long long bytesWritten, long long totalBytes) {
             unsigned long index = [self.downloadTasks indexOfObject:task];
             
             if (index < progressHandlers.count) {
-                if (progress > files[index].progress)
-                    progressHandlers[index](progress, index);
+                    progressHandlers[index](index, bytesWritten, totalBytes);
             }
         } completionHandler:^(NSError *error, NSURLSessionDownloadTask *task) {
             unsigned long index = [self.downloadTasks indexOfObject:task];
@@ -95,7 +80,7 @@
 }
 
 - (void)resumeDownloadTaskAtIndex:(int)index
-              withProgressHandler:(void (^)(float, unsigned long))progressHandler
+              withProgressHandler:(void (^)(unsigned long, long long, long long))progressHandler
           downloadCompleteHandler:(void (^)(NSError *, unsigned long))downloadCompleteHandler
           resumeCompletionHandler:(void (^)(NSError *))completionHandler {
     if (!completionHandler)
@@ -107,17 +92,19 @@
     dispatch_async(self.serialQueue, ^{
         NSURLSessionDownloadTask *oldDownloadTask = self.downloadTasks[index];
         NSData *resumeData = [[DownloadDataCache instance] dataForDownloadTask:oldDownloadTask];
-        self.downloadTasks[index] = [self downloadTaskByResumeData:resumeData];
         
         if (!resumeData || !self.downloadTasks[index]) {
             NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadBusiness" code:ERROR_GET_RESUME_DATA_FAILED userInfo:@{@"Tiếp tục download thất bại!": NSLocalizedDescriptionKey}];
             completionHandler(error);
         } else {
-            [[FileDownloadAdapter instance] executeDownloadTask:self.downloadTasks[index] withProgressHandler:^(float progress, NSURLSessionDownloadTask *downloadTask) {
-                progressHandler(progress, index);
+            self.downloadTasks[index] = [self downloadTaskByResumeData:resumeData];
+            [[FileDownloadAdapter instance] executeDownloadTask:self.downloadTasks[index] withProgressHandler:^(NSURLSessionDownloadTask *downloadTask, long long bytesWritten, long long totalBytes) {
+                progressHandler(index, bytesWritten, totalBytes);
+                
             } completionHandler:^(NSError *error, NSURLSessionDownloadTask *downloadTask) {
                 downloadCompleteHandler(error, index);
                 [[DownloadDataCache instance] removeDataForDownloadTask:oldDownloadTask];
+                
             } onDispatchQueue:self.serialQueue];
             
             completionHandler(nil);
@@ -146,8 +133,8 @@
 }
 
 - (void)retryDownloadFile:(File *)file atIndex:(int)index
-      withProgressHandler:(void (^)(float, unsigned long))progressHandler
-  downloadCompleteHandler:(void(^)(NSError *, unsigned long))completionHandler {
+      withProgressHandler:(void (^)(unsigned long, long long, long long))progressHandler
+  downloadCompleteHandler:(void (^)(NSError *, unsigned long))completionHandler {
     if (!completionHandler)
             return;
         
@@ -161,12 +148,12 @@
             NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadBusiness" code:ERROR_GET_RESUME_DATA_FAILED userInfo:@{@"Download thất bại!": NSLocalizedDescriptionKey}];
             completionHandler(error, index);
         } else {
-            [[FileDownloadAdapter instance] executeDownloadTask:self.downloadTasks[index] withProgressHandler:^(float progress, NSURLSessionDownloadTask *downloadTask) {
-                if (progress > file.progress) {
-                    progressHandler(progress, index);
-                }
+            [[FileDownloadAdapter instance] executeDownloadTask:self.downloadTasks[index] withProgressHandler:^(NSURLSessionDownloadTask *downloadTask, long long bytesWritten, long long totalBytes) {
+                progressHandler(index, bytesWritten, totalBytes);
+                
             } completionHandler:^(NSError *error, NSURLSessionDownloadTask *downloadTask) {
                 completionHandler(error, index);
+                
             } onDispatchQueue:self.serialQueue];
         }
     });
