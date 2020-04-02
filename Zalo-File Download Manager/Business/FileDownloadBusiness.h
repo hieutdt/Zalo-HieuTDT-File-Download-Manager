@@ -15,11 +15,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithDownloadFilesCount:(int)count;
 
-- (void)downloadMultiFiles:(NSArray<File *> *)files withProgressHandlers:(NSArray<void (^)(float, unsigned long)> *)progressHandlers completionHandlers:(NSArray<void (^)(NSError *, unsigned long)> *)completionHandlers;
+- (void)downloadMultiFiles:(NSArray<File *> *)files
+      withProgressHandlers:(NSArray<void (^)(float, unsigned long)> *)progressHandlers
+        completionHandlers:(NSArray<void (^)(NSError *, unsigned long)> *)completionHandlers;
 
 - (void)pauseDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler;
 
-- (void)resumeDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler;
+- (void)resumeDownloadTaskAtIndex:(int)index
+              withProgressHandler:(void (^)(float, unsigned long))progressHandler
+          downloadCompleteHandler:(void(^)(NSError *, unsigned long))downloadCompleteHandler
+          resumeCompletionHandler:(void (^)(NSError *))completionHandler;
 
 - (NSMutableArray<File *> *)getDownloadFiles;
 

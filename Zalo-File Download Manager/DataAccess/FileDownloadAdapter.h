@@ -15,11 +15,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)instance;
 
-- (void)executeDownloadTasks:(NSArray<NSURLSessionDownloadTask *> *)downloadTasks withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue;
+- (void)executeDownloadTask:(NSURLSessionDownloadTask *)downloadTask
+        withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler
+          completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler
+            onDispatchQueue:(dispatch_queue_t)dispatchQueue;
 
-- (void)pauseDownloadTask:(NSURLSessionDownloadTask *)downloadTask withCompletionHandler:(void (^)(NSError *error, NSData *resumeData))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue;
 
-- (void)resumeDownloadTask:(NSURLSessionDownloadTask *)downloadTask withResumeData:(NSData *)resumeData completionHandler:(void (^)(NSError *error))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue;
+- (void)executeDownloadTasks:(NSArray<NSURLSessionDownloadTask *> *)downloadTasks
+         withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler
+           completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler
+             onDispatchQueue:(dispatch_queue_t)dispatchQueue;
+
+- (void)pauseDownloadTask:(NSURLSessionDownloadTask *)downloadTask
+    withCompletionHandler:(void (^)(NSError *error, NSData *resumeData))completionHandler
+          onDispatchQueue:(dispatch_queue_t)dispatchQueue;
 
 @end
 

@@ -23,8 +23,8 @@
 @property (nonatomic, strong) FileDownloadBusiness *fileDownloadBusiness;
 
 @property (nonatomic, strong) NSMutableArray<File *> *downloadFiles;
-@property (nonatomic, strong) NSMutableArray *progressHandlers;
-@property (nonatomic, strong) NSMutableArray *completionHandlers;
+@property (nonatomic, strong) NSMutableArray<void (^)(float, unsigned long)> *progressHandlers;
+@property (nonatomic, strong) NSMutableArray<void (^)(NSError *, unsigned long)> *completionHandlers;
 
 @property (nonatomic, strong) FileDownloadTableViewModel *tableViewModel;
 @property (nonatomic, strong) NSArray<FileDownloadViewModel *> *viewModelsArray;
@@ -143,8 +143,30 @@
             }
         }];
     } else if (self.downloadFiles[index].state == FileDownloadPause) {
-        [self.fileDownloadBusiness resumeDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
-            
+        [self.fileDownloadBusiness resumeDownloadTaskAtIndex:index withProgressHandler:^(float progress, unsigned long index) {
+            self.progressHandlers[index](progress, index);
+        } downloadCompleteHandler:^(NSError *error, unsigned long index) {
+            self.completionHandlers[index](error, index);
+        } resumeCompletionHandler:^(NSError *error) {
+            if (error) {
+                self.downloadFiles[index].state = FileDownloadCancel;
+                self.viewModelsArray[index].state = FileDownloadCancel;
+                
+                // Update UI
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                });
+            } else {
+                self.downloadFiles[index].state = FileDownloading;
+                self.viewModelsArray[index].state = FileDownloading;
+                
+                // Update UI
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
+                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                });
+            }
         }];
     }
 }

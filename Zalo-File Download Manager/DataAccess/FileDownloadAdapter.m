@@ -47,23 +47,40 @@
     return sharedInstance;
 }
 
-- (void)executeDownloadTasks:(NSArray<NSURLSessionDownloadTask *> *)downloadTasks withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+- (void)executeDownloadTask:(NSURLSessionDownloadTask *)downloadTask
+        withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler
+          completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler
+            onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+    if (!downloadTask || !progressHandler || !completionHandler || !dispatchQueue) {
+        return;
+    }
+    
     dispatch_async(self.serialQueue, ^{
         [self.dispatchQueues addObject:dispatchQueue];
         [self.progressHandlers addObject:progressHandler];
         [self.completionHandlers addObject:completionHandler];
+        [self.downloadTasks addObject:downloadTask];
+        [self.taskQueueDictionary addEntriesFromDictionary:@{downloadTask : dispatchQueue}];
         
-        for (int i = 0; i < downloadTasks.count; i++) {
-            [self.downloadTasks addObject:downloadTasks[i]];
-            [self.taskQueueDictionary addEntriesFromDictionary:@{downloadTasks[i] : dispatchQueue}];
-            
-            // Execute task
-            [downloadTasks[i] resume];
-        }
+        [downloadTask resume];
     });
 }
 
-- (void)pauseDownloadTask:(NSURLSessionDownloadTask *)downloadTask withCompletionHandler:(void (^)(NSError *error, NSData *resumeData))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+- (void)executeDownloadTasks:(NSArray<NSURLSessionDownloadTask *> *)downloadTasks
+         withProgressHandler:(void (^)(float, NSURLSessionDownloadTask *))progressHandler
+           completionHandler:(void (^)(NSError *, NSURLSessionDownloadTask *))completionHandler
+             onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+    if (!downloadTasks || !progressHandler || !completionHandler || !dispatchQueue)
+        return;
+    
+    for (int i = 0; i < downloadTasks.count; i++) {
+        [self executeDownloadTask:downloadTasks[i] withProgressHandler:progressHandler completionHandler:completionHandler onDispatchQueue:dispatchQueue];
+    }
+}
+
+- (void)pauseDownloadTask:(NSURLSessionDownloadTask *)downloadTask
+    withCompletionHandler:(void (^)(NSError *error, NSData *resumeData))completionHandler
+          onDispatchQueue:(dispatch_queue_t)dispatchQueue {
     if (!completionHandler || !downloadTask)
         return;
     
@@ -84,17 +101,6 @@
             }
         }];
     });
-}
-
-- (void)resumeDownloadTask:(NSURLSessionDownloadTask *)downloadTask withResumeData:(NSData *)resumeData completionHandler:(void (^)(NSError *error))completionHandler onDispatchQueue:(dispatch_queue_t)dispatchQueue {
-    if (!downloadTask || !completionHandler || !dispatchQueue)
-           return;
-       
-       dispatch_sync(self.serialQueue, ^{
-           NSLog(@"Resume downloadTask");
-           
-           [downloadTask resume];
-       });
 }
 
 

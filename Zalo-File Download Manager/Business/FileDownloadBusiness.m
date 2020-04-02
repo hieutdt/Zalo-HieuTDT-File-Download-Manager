@@ -43,7 +43,9 @@
     return self.downloadFiles;
 }
 
-- (void)downloadMultiFiles:(NSArray<File *> *)files withProgressHandlers:(NSArray<void (^)(float, unsigned long)> *)progressHandlers completionHandlers:(NSArray<void (^)(NSError *, unsigned long)> *)completionHandlers {
+- (void)downloadMultiFiles:(NSArray<File *> *)files
+      withProgressHandlers:(NSArray<void (^)(float, unsigned long)> *)progressHandlers
+        completionHandlers:(NSArray<void (^)(NSError *, unsigned long)> *)completionHandlers {
     
     if (!files || !completionHandlers || !progressHandlers) {
         return;
@@ -92,31 +94,38 @@
     });
 }
 
-- (void)resumeDownloadTaskAtIndex:(int)index withCompletionHandler:(void (^)(NSError *))completionHandler {
+- (void)resumeDownloadTaskAtIndex:(int)index
+              withProgressHandler:(void (^)(float, unsigned long))progressHandler
+          downloadCompleteHandler:(void (^)(NSError *, unsigned long))downloadCompleteHandler
+          resumeCompletionHandler:(void (^)(NSError *))completionHandler {
     if (!completionHandler)
-        return;
-    
+            return;
+        
     if (index >= self.downloadTasks.count)
         return;
     
     dispatch_async(self.serialQueue, ^{
-        //TODO: Get old progress handler, completion handler
         NSURLSessionDownloadTask *oldDownloadTask = self.downloadTasks[index];
         NSData *resumeData = [[DownloadDataCache instance] dataForDownloadTask:oldDownloadTask];
+        self.downloadTasks[index] = [self downloadTaskByResumeData:resumeData];
         
-        NSURLSessionDownloadTask * newDownloadTask = [self downloadTaskByResumeData:resumeData];
-        
-        // TODO: Pass progress handler, completion handler and queue here
-        [[FileDownloadAdapter instance] resumeDownloadTask:newDownloadTask withCompletionHandler:^(NSError *error) {
-            if (error) {
-                completionHandler(error);
-            } else {
+        if (!resumeData || !self.downloadTasks[index]) {
+            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadBusiness" code:ERROR_GET_RESUME_DATA_FAILED userInfo:@{@"Tiếp tục download thất bại!": NSLocalizedDescriptionKey}];
+            completionHandler(error);
+        } else {
+            [[FileDownloadAdapter instance] executeDownloadTask:self.downloadTasks[index] withProgressHandler:^(float progress, NSURLSessionDownloadTask *downloadTask) {
+                progressHandler(progress, index);
+            } completionHandler:^(NSError *error, NSURLSessionDownloadTask *downloadTask) {
+                downloadCompleteHandler(error, index);
                 [[DownloadDataCache instance] removeDataForDownloadTask:oldDownloadTask];
-                completionHandler(nil);
-            }
-        } onDispatchQueue:self.serialQueue];
+            } onDispatchQueue:self.serialQueue];
+            
+            completionHandler(nil);
+        }
     });
 }
+
+#pragma mark - GenerateDownloadTask
 
 - (NSURLSessionDownloadTask *)downloadTaskByFile:(File *)file {
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
