@@ -145,7 +145,7 @@
         self.downloadTasks[index] = [self downloadTaskByFile:file];
         
         if (!self.downloadTasks[index]) {
-            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadBusiness" code:ERROR_GET_RESUME_DATA_FAILED userInfo:@{@"Download thất bại!": NSLocalizedDescriptionKey}];
+            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadBusiness" code:ERROR_RETRY_DOWNLOAD_FAILED userInfo:@{@"Download thất bại!": NSLocalizedDescriptionKey}];
             completionHandler(error, index);
         } else {
             [[FileDownloadAdapter instance] executeDownloadTask:self.downloadTasks[index] withProgressHandler:^(NSURLSessionDownloadTask *downloadTask, long long bytesWritten, long long totalBytes) {

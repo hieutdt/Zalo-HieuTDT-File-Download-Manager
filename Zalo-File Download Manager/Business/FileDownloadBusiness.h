@@ -13,8 +13,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FileDownloadBusiness : NSObject
 
-- (instancetype)initWithDownloadFilesCount:(int)count;
-
 - (void)downloadMultiFiles:(NSArray<File *> *)files
       withProgressHandlers:(NSArray<void (^)(unsigned long, long long, long long)> *)progressHandlers
         completionHandlers:(NSArray<void (^)(NSError *, unsigned long)> *)completionHandlers;

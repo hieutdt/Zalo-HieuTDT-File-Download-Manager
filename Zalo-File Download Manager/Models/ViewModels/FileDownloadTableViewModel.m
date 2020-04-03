@@ -12,7 +12,7 @@
 #import "FileDownloadViewModel.h"
 #import "FileDownloadCell.h"
 
-@interface FileDownloadTableViewModel () <NITableViewModelDelegate, UITableViewDelegate, FileDownloadCellDelegate, UIScrollViewDelegate>
+@interface FileDownloadTableViewModel () <NITableViewModelDelegate, UITableViewDelegate, UIScrollViewDelegate>
 
 @property (nonatomic) BOOL isScrolling;
 
@@ -24,7 +24,7 @@
     self = [super init];
     if (self) {
         _tableViewDelegate = self;
-        _tableViewDataSource = [[NITableViewModel alloc] initWithDelegate:self];
+        _tableViewDataSource = [[NITableViewModel alloc] initWithDelegate:(id)[NICellFactory class]];
         _isScrolling = NO;
     }
     return self;
@@ -34,7 +34,7 @@
     self = [super init];
     if (self) {
         _tableViewDelegate = self;
-        _tableViewDataSource = [[NITableViewModel alloc] initWithListArray:array delegate:self];
+        _tableViewDataSource = [[NITableViewModel alloc] initWithListArray:array delegate:(id)[NICellFactory class]];
         _isScrolling = NO;
     }
     return self;
@@ -44,22 +44,10 @@
     self = [super init];
     if (self) {
         _tableViewDelegate = self;
-        _tableViewDataSource = [[NITableViewModel alloc] initWithSectionedArray:array delegate:self];
+        _tableViewDataSource = [[NITableViewModel alloc] initWithSectionedArray:array delegate:(id)[NICellFactory class]];
         _isScrolling = NO;
     }
     return self;
-}
-
-
-#pragma mark - NITableViewModelDelegate
-
-- (nonnull UITableViewCell *)tableViewModel: (nonnull NITableViewModel *)tableViewModel
-                           cellForTableView: (nonnull UITableView *)tableView
-                                atIndexPath: (nonnull NSIndexPath *)indexPath
-                                 withObject: (nonnull id)object {
-    FileDownloadCell *cell = (FileDownloadCell *)[NICellFactory tableViewModel:tableViewModel cellForTableView:tableView atIndexPath:indexPath withObject:object];
-    cell.delegate = self;
-    return cell;
 }
 
 
@@ -71,17 +59,6 @@
     }
 }
 
-#pragma mark - FileDownloadCellDelegate
-
-- (void)pauseButtonTappedInCell:(UIView *)cell {
-    if (!cell) {
-        return;
-    }
-    
-    if (self.delegate && [self.delegate respondsToSelector:@selector(pauseButtonTappedAtCell:)]) {
-        [self.delegate pauseButtonTappedAtCell:(FileDownloadCell *)cell];
-    }
-}
 
 #pragma mark - UIScrollViewDelegate
 

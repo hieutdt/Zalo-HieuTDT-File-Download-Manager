@@ -14,7 +14,6 @@
 
 @interface FileDownloadCell () <NICell>
 
-@property (nonatomic, strong) UIImageView *headerImageView;
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *stateLabel;
 @property (nonatomic, strong) UIProgressView *progressBar;
@@ -30,60 +29,46 @@
         [subView removeFromSuperview];
     }
     
-    _headerImageView = [[UIImageView alloc] init];
     _nameLabel = [[UILabel alloc] init];
     _stateLabel = [[UILabel alloc] init];
     _progressBar = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
     _stopButton = [[UIButton alloc] init];
     
-    [self.contentView addSubview:self.headerImageView];
     [self.contentView addSubview:self.nameLabel];
     [self.contentView addSubview:self.stateLabel];
     [self.contentView addSubview:self.progressBar];
     [self.contentView addSubview:self.stopButton];
     
-    self.headerImageView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.headerImageView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:15].active = YES;
-    [self.headerImageView.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:15].active = YES;
-    [self.headerImageView.heightAnchor constraintEqualToConstant:DOWNLOAD_CELL_HEADER_IMAGE_HEIGHT].active = YES;
-    [self.headerImageView.widthAnchor constraintEqualToConstant:DOWNLOAD_CELL_HEADER_IMAGE_WIDTH].active = YES;
+    [self.contentView.heightAnchor constraintEqualToConstant:70].active = YES;
     
     self.nameLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [self.nameLabel.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:13].active = YES;
-    [self.nameLabel.leadingAnchor constraintEqualToAnchor:self.headerImageView.trailingAnchor constant:15].active = YES;
+    [self.nameLabel.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:20].active = YES;
     [self.nameLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
     self.nameLabel.font = [UIFont boldSystemFontOfSize:17];
     
     self.stateLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [self.stateLabel.topAnchor constraintEqualToAnchor:self.nameLabel.bottomAnchor constant:4].active = YES;
-    [self.stateLabel.leadingAnchor constraintEqualToAnchor:self.headerImageView.trailingAnchor constant:15].active = YES;
+    [self.stateLabel.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:20].active = YES;
     [self.stateLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
     self.stateLabel.font = [UIFont systemFontOfSize:13];
     self.stateLabel.textColor = [UIColor darkGrayColor];
     
     self.progressBar.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.progressBar.topAnchor constraintEqualToAnchor:self.headerImageView.bottomAnchor constant:8].active = YES;
+    [self.progressBar.topAnchor constraintEqualToAnchor:self.stateLabel.bottomAnchor constant:8].active = YES;
     [self.progressBar.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:10].active = YES;
     [self.progressBar.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
-    [self.progressBar.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-10].active = YES;
     self.progressBar.tintColor = [UIColor systemBlueColor];
     [self.progressBar setProgress:0 animated:NO];
     
     self.stopButton.translatesAutoresizingMaskIntoConstraints = NO;
     [self.stopButton.heightAnchor constraintEqualToConstant:35].active = YES;
     [self.stopButton.widthAnchor constraintEqualToConstant:35].active = YES;
-    [self.stopButton.centerYAnchor constraintEqualToAnchor:self.headerImageView.centerYAnchor].active = YES;
+    [self.stopButton.centerYAnchor constraintEqualToAnchor:self.contentView.centerYAnchor].active = YES;
     [self.stopButton.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
     [self.stopButton setImage:[UIImage imageNamed:@"pause"] forState:UIControlStateNormal];
-    [self.stopButton addTarget:self action:@selector(stopButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     
     [self setSelectionStyle:UITableViewCellSelectionStyleNone];
-}
-
-- (void)stopButtonTapped {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(pauseButtonTappedInCell:)]) {
-        [self.delegate pauseButtonTappedInCell:self];
-    }
 }
 
 - (void)prepareForReuse {
@@ -100,13 +85,12 @@
         return NO;
     }
     
-    if (!self.headerImageView || !self.nameLabel || !self.stateLabel || !self.progressBar) {
+    if (!self.nameLabel || !self.stateLabel || !self.progressBar) {
         [self initAndLayoutView];
     }
     
     FileDownloadViewModel *viewModel = (FileDownloadViewModel *)object;
     
-    [self.headerImageView setImage:[UIImage imageNamed:viewModel.imageName]];
     [self.nameLabel setText:viewModel.fileName];
     if (viewModel.state == FileDownloading) {
         if (viewModel.totalBytes > 0) {

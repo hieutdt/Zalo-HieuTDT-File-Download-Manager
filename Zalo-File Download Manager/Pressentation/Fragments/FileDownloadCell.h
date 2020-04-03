@@ -10,15 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol FileDownloadCellDelegate <NSObject>
-
-- (void)pauseButtonTappedInCell:(UIView *)cell;
-
-@end
-
 @interface FileDownloadCell : UITableViewCell
-
-@property (nonatomic, assign) id<FileDownloadCellDelegate> delegate;
 
 @end
 

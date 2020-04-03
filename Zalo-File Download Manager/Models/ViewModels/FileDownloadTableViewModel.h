@@ -18,8 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol FileDownloadTableViewModelDelegate <NSObject>
 
-- (void)pauseButtonTappedAtCell:(FileDownloadCell *)cell;
-
 - (void)didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
 - (void)scrollViewDidBeginScroll;

@@ -147,22 +147,11 @@
     });
 }
 
-#pragma mark - FileDownloadTableViewModelDelegateProtocol
+#pragma mark - DownloadFileActionMethod
 
-- (void)pauseButtonTappedAtCell:(FileDownloadCell *)cell {
-    if (!cell)
-        return;
-    
-    // BUG: this indexPath maybe wrong
-    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
-    if (!indexPath)
-        return;
-    
-    int index = (int)indexPath.row;
+- (void)pauseDownloadFileAtIndex:(int)index {
     if (index >= self.downloadFiles.count)
         return;
-    
-    NSLog(@"IndexPath: %@", indexPath);
     
     if (self.downloadFiles[index].state == FileDownloading) {
         // Pause or cancel if failed
@@ -173,8 +162,14 @@
                 [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
             }
         }];
-        
-    } else if (self.downloadFiles[index].state == FileDownloadPause) {
+    }
+}
+
+- (void)resumeDownloadFileAtIndex:(int)index {
+    if (index >= self.downloadFiles.count)
+           return;
+    
+    if (self.downloadFiles[index].state == FileDownloadPause) {
         // Resume
         [self.fileDownloadBusiness resumeDownloadTaskAtIndex:index withProgressHandler:^(unsigned long index, long long bytesWritten, long long totalBytes) {
             self.progressHandlers[index](index, bytesWritten, totalBytes);
@@ -189,31 +184,84 @@
                 [self updateCellAtIndex:index withState:FileDownloading bytesWritten:self.downloadFiles[index].bytesWritten totalBytes:self.downloadFiles[index].totalBytes];
             }
         }];
-        
-    } else if (self.downloadFiles[index].state == FileDownloadCancel) {
-        //Retry
-        [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
-        
-        [self.fileDownloadBusiness retryDownloadFile:self.downloadFiles[index] atIndex:index withProgressHandler:self.progressHandlers[index] downloadCompleteHandler:self.completionHandlers[index]];
     }
 }
 
+- (void)cancelDownloadFileAtIndex:(int)index {
+    if (index >= self.downloadFiles.count)
+        return;
+    
+    [self.fileDownloadBusiness cancelDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
+        if (!error) {
+            [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
+        }
+    }];
+}
+
+- (void)retryDownloadFileAtIndex:(int)index {
+    if (index >= self.downloadFiles.count)
+        return;
+    
+    if (self.downloadFiles[index].state == FileDownloadCancel) {
+       //Retry
+       [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
+       
+       [self.fileDownloadBusiness retryDownloadFile:self.downloadFiles[index] atIndex:index withProgressHandler:self.progressHandlers[index] downloadCompleteHandler:self.completionHandlers[index]];
+    }
+}
+
+
+#pragma mark - FileDownloadTableViewModelDelegateProtocol
+
 - (void)didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Huỷ tải xuống" message:[NSString stringWithFormat:@"Bạn có muốn kết thúc tải xuống tập tin %@", self.downloadFiles[indexPath.row].fileName] preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction *acceptAction = [UIAlertAction actionWithTitle:@"Xác nhận" style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
-        int index = (int)indexPath.row;
-        [self.fileDownloadBusiness cancelDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
-            if (!error) {
-                [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
-            }
+    int index = (int)indexPath.row;
+    if (index >= self.downloadFiles.count)
+        return;
+    
+    File *file = self.downloadFiles[index];
+    NSString *message = @"";
+    UIAlertAction *firstAction = nil;
+    UIAlertAction *secondAction = nil;
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Huỷ" style:UIAlertActionStyleCancel handler:nil];
+    
+    if (file.state == FileDownloading) {
+        message = [NSString stringWithFormat:@"%@ đang được tải. Bạn có muốn?", file.fileName];
+        firstAction = [UIAlertAction actionWithTitle:@"Tạm dừng" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self pauseDownloadFileAtIndex:index];
         }];
         
-    }];
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Từ chối" style:UIAlertActionStyleCancel handler:nil];
+        secondAction = [UIAlertAction actionWithTitle:@"Kết thúc" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self cancelDownloadFileAtIndex:index];
+        }];
+        
+    } else if (file.state == FileDownloadPause) {
+        message = [NSString stringWithFormat:@"%@ đang tạm ngừng tải xuống. Bạn có muốn?", file.fileName];
+        firstAction = [UIAlertAction actionWithTitle:@"Tiếp tục" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self resumeDownloadFileAtIndex:index];
+        }];
+        
+        secondAction = [UIAlertAction actionWithTitle:@"Kết thúc" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self cancelDownloadFileAtIndex:index];
+        }];
+        
+    } else if (file.state == FileDownloadCancel) {
+        message = [NSString stringWithFormat:@"%@ đã bị hủy tải xuống. Bạn có muốn?", file.fileName];
+        firstAction = [UIAlertAction actionWithTitle:@"Thử lại" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self retryDownloadFileAtIndex:index];
+        }];
+        
+    } else
+        return;
     
-    [alert addAction:acceptAction];
-    [alert addAction:cancelAction];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Thông báo" message:message preferredStyle:UIAlertControllerStyleActionSheet];
     
+    if (firstAction)
+        [alert addAction:firstAction];
+    if (secondAction)
+        [alert addAction:secondAction];
+    if (cancelAction)
+        [alert addAction:cancelAction];
+        
     [self presentViewController:alert animated:YES completion:nil];
 }
 
