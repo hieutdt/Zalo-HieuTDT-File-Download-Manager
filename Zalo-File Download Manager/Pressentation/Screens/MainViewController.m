@@ -13,9 +13,10 @@
 #import "FileDownloadBusiness.h"
 #import "FileDownloadTableViewModel.h"
 #import "FileDownloadViewModel.h"
+#import "FileDownloadCell.h"
 #import "AppConsts.h"
 
-@interface MainViewController () <UITableViewDelegate, FileDownloadTableViewModelDelegate, UIScrollViewDelegate>
+@interface MainViewController () <UITableViewDelegate, FileDownloadTableViewModelDelegate>
 
 @property (nonatomic, strong) UIBarButtonItem *downloadBarButton;
 @property (nonatomic, strong) UITableView *tableView;
@@ -51,6 +52,10 @@
     for (unsigned long i = 0; i < self.downloadFiles.count; i++) {
         [self.progressHandlers addObject:^(unsigned long index, long long bytesWritten, long long totalBytes) {
             if (index < self.downloadFiles.count) {
+                // Only update ui if the download is more than 1MB to avoid high CPU if reload cell too much
+                if (bytesWritten - self.downloadFiles[index].bytesWritten < 1024 * 1024)
+                    return;
+                
                 [weakSelf updateCellAtIndex:(int)index withState:FileDownloading bytesWritten:bytesWritten totalBytes:totalBytes];
             }
         }];

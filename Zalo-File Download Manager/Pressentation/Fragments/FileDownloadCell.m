@@ -17,7 +17,11 @@
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *stateLabel;
 @property (nonatomic, strong) UIProgressView *progressBar;
-@property (nonatomic, strong) UIButton *stopButton;
+@property (nonatomic, strong) UIImageView *actionImageView;
+
+@property (nonatomic, strong) UIImage *pauseImage;
+@property (nonatomic, strong) UIImage *resumeImage;
+@property (nonatomic, strong) UIImage *retryImage;
            
 @end
 
@@ -32,12 +36,16 @@
     _nameLabel = [[UILabel alloc] init];
     _stateLabel = [[UILabel alloc] init];
     _progressBar = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleBar];
-    _stopButton = [[UIButton alloc] init];
+    _actionImageView = [[UIImageView alloc] init];
+    
+    _retryImage = [[UIImage imageNamed:@"retry"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    _pauseImage = [[UIImage imageNamed:@"pause"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    _resumeImage = [[UIImage imageNamed:@"resume"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     
     [self.contentView addSubview:self.nameLabel];
     [self.contentView addSubview:self.stateLabel];
     [self.contentView addSubview:self.progressBar];
-    [self.contentView addSubview:self.stopButton];
+    [self.contentView addSubview:self.actionImageView];
     
     [self.contentView.heightAnchor constraintEqualToConstant:70].active = YES;
     
@@ -61,12 +69,13 @@
     self.progressBar.tintColor = [UIColor systemBlueColor];
     [self.progressBar setProgress:0 animated:NO];
     
-    self.stopButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.stopButton.heightAnchor constraintEqualToConstant:35].active = YES;
-    [self.stopButton.widthAnchor constraintEqualToConstant:35].active = YES;
-    [self.stopButton.centerYAnchor constraintEqualToAnchor:self.contentView.centerYAnchor].active = YES;
-    [self.stopButton.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
-    [self.stopButton setImage:[UIImage imageNamed:@"pause"] forState:UIControlStateNormal];
+    self.actionImageView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.actionImageView.heightAnchor constraintEqualToConstant:35].active = YES;
+    [self.actionImageView.widthAnchor constraintEqualToConstant:35].active = YES;
+    [self.actionImageView.centerYAnchor constraintEqualToAnchor:self.contentView.centerYAnchor].active = YES;
+    [self.actionImageView.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10].active = YES;
+    [self.actionImageView setImage:self.pauseImage];
+    self.actionImageView.tintColor = [UIColor grayColor];
     
     [self setSelectionStyle:UITableViewCellSelectionStyleNone];
 }
@@ -75,7 +84,7 @@
     [super prepareForReuse];
     [self.stateLabel setTextColor:[UIColor darkGrayColor]];
     self.progressBar.hidden = NO;
-    self.stopButton.hidden = NO;
+    self.actionImageView.hidden = NO;
 }
 
 #pragma mark - NICellProtocol
@@ -99,11 +108,11 @@
         } else {
             [self.stateLabel setText:@"Đang tải"];
         }
-        [self.stopButton setImage:[UIImage imageNamed:@"pause"] forState:UIControlStateNormal];
+        [self.actionImageView setImage:self.pauseImage];
         
     } else if (viewModel.state == FileDownloadFinish) {
         [self.stateLabel setText:@"Đã tải xong"];
-        self.stopButton.hidden = YES;
+        self.actionImageView.hidden = YES;
         self.progressBar.hidden = YES;
         self.stateLabel.textColor = [UIColor systemBlueColor];
         
@@ -114,13 +123,13 @@
         } else {
             [self.stateLabel setText:@"Tạm dừng"];
         }
-        [self.stopButton setImage:[UIImage imageNamed:@"resume"] forState:UIControlStateNormal];
+        [self.actionImageView setImage:self.resumeImage];
         
     } else if (viewModel.state == FileDownloadCancel) {
         [self.stateLabel setText:@"Đã huỷ"];
         self.stateLabel.textColor = [UIColor systemRedColor];
         self.progressBar.hidden = YES;
-        [self.stopButton setImage:[UIImage imageNamed:@"retry"] forState:UIControlStateNormal];
+        [self.actionImageView setImage:self.retryImage];
     }
     
     float progress = 0;
