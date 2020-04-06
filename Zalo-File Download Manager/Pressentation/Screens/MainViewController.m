@@ -15,6 +15,7 @@
 #import "FileDownloadViewModel.h"
 #import "FileDownloadCell.h"
 #import "AppConsts.h"
+#import "FileDownloadOperator.h"
 
 @interface MainViewController () <UITableViewDelegate, FileDownloadTableViewModelDelegate>
 

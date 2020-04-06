@@ -13,11 +13,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface File : NSObject
 
+@property (nonatomic, strong) NSString *identifier;
 @property (nonatomic, strong) NSString *fileName;
 @property (nonatomic, strong) NSString *url;
-@property (nonatomic) FileDownloadState state;
-@property (nonatomic) long long totalBytes;
-@property (nonatomic) long long bytesWritten;
+@property (nonatomic, strong) NSString *locationPath;
+@property (nonatomic, assign) FileDownloadState state;
+@property (nonatomic, assign) long long totalBytes;
+@property (nonatomic, assign) long long bytesWritten;
 
 - (instancetype)initWithName:(NSString *)fileName url:(NSString *)url;
 

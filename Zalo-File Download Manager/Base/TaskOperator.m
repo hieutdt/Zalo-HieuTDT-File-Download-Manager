@@ -1,0 +1,28 @@
+//
+//  TaskOperator.m
+//  Zalo-File Download Manager
+//
+//  Created by Trần Đình Tôn Hiếu on 4/4/20.
+//  Copyright © 2020 Trần Đình Tôn Hiếu. All rights reserved.
+//
+
+#import "TaskOperator.h"
+
+@implementation TaskOperator
+
+- (instancetype)initWithTaskBlock:(dispatch_block_t)block priority:(TaskPriority)priority {
+    self = [super init];
+    if (self) {
+        _taskBlock = block;
+        _priority = priority;
+    }
+    return self;
+}
+
+- (void)execute {
+    if (self.taskBlock) {
+        self.taskBlock();
+    }
+}
+
+@end
