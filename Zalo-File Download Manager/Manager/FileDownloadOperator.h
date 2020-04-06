@@ -15,7 +15,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FileDownloadOperator : TaskOperator
 
-- (instancetype)initWithFileDownloadItem:(FileDownloadItem *)item priority:(TaskPriority)priority;
+- (instancetype)initWithFileDownloadItem:(FileDownloadItem *)item
+                                priority:(TaskPriority)priority;
+
+- (instancetype)initWithFileDownloadItem:(FileDownloadItem *)item
+                                priority:(TaskPriority)priority
+                       timeOutForRequest:(int)timeOut;
 
 @end
 

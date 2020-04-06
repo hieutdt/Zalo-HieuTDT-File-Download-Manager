@@ -19,9 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)performDownloadFileWithUrl:(NSString *)url
                           priority:(TaskPriority)priority
+         timeOutIntervalForRequest:(int)timeOut
                    progressHandler:(void (^)(NSString *url, long long bytesWritten, long long totalBytes))progressHandler
                  completionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler;
-
 
 @end
 

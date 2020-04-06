@@ -73,7 +73,10 @@
         return;
     
     for (int i = 0; i < downloadTasks.count; i++) {
-        [self executeDownloadTask:downloadTasks[i] withProgressHandler:progressHandler completionHandler:completionHandler onDispatchQueue:dispatchQueue];
+        [self executeDownloadTask:downloadTasks[i]
+              withProgressHandler:progressHandler
+                completionHandler:completionHandler
+                  onDispatchQueue:dispatchQueue];
     }
 }
 
@@ -91,7 +94,9 @@
                 });
             } else {
                 dispatch_async(dispatchQueue, ^{
-                    NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadAdapter" code:ERROR_GET_RESUME_DATA_FAILED userInfo:@{@"Tạm dừng download thất bại!": NSLocalizedDescriptionKey}];
+                    NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadAdapter"
+                                                                code:ERROR_GET_RESUME_DATA_FAILED
+                                                            userInfo:@{@"Tạm dừng download thất bại!": NSLocalizedDescriptionKey}];
                     completionHandler(error, resumeData);
                 });
             }
@@ -124,7 +129,9 @@
 
 #pragma mark - NSURLSessionDownloadDelegateProtocol
 
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+- (void)URLSession:(NSURLSession *)session
+      downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten
+ totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
     @synchronized (self) {
         dispatch_queue_t queue = [self.taskQueueDictionary objectForKey:downloadTask];
         // This index use in queues, progressHandlers and completionHandlers;
@@ -138,7 +145,8 @@
     }
 }
 
-- (void)URLSession:(nonnull NSURLSession *)session downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(nonnull NSURL *)location {
+- (void)URLSession:(nonnull NSURLSession *)session
+      downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(nonnull NSURL *)location {
     @synchronized (self) {
         NSLog(@"Download complete!");
         

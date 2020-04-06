@@ -29,8 +29,9 @@
 
 - (void)performDownloadFileWithUrl:(NSString *)url
                           priority:(TaskPriority)priority
-                   progressHandler:(void (^)(NSString * _Nonnull url, long long bytesWritten, long long totalBytes))progressHandler
-                 completionHandler:(void (^)(NSString * _Nonnull url, NSString * _Nonnull locationPath, NSError *error))completionHandler {
+         timeOutIntervalForRequest:(int)timeOut
+                   progressHandler:(void (^)(NSString *url, long long bytesWritten, long long totalBytes))progressHandler
+                 completionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler {
     if (!url || !progressHandler || !completionHandler)
         return;
     
@@ -39,8 +40,12 @@
     }
     
     @synchronized (self) {
-        FileDownloadItem *downloadItem = [[FileDownloadItem alloc] initWithDownloadUrl:url progressHandler:progressHandler completionHandler:completionHandler];
-        FileDownloadOperator *downloadOperator = [[FileDownloadOperator alloc] initWithFileDownloadItem:downloadItem priority:priority];
+        FileDownloadItem *downloadItem = [[FileDownloadItem alloc] initWithDownloadUrl:url
+                                                                       progressHandler:progressHandler
+                                                                     completionHandler:completionHandler];
+        FileDownloadOperator *downloadOperator = [[FileDownloadOperator alloc] initWithFileDownloadItem:downloadItem
+                                                                                               priority:priority
+                                                                                      timeOutForRequest:timeOut];
         
         [self.fileOperatorDictionary addEntriesFromDictionary:@{url : downloadOperator}];
         
