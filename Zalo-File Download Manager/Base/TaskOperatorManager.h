@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface TaskOperatorManager : NSObject
 
+@property (nonatomic, strong) dispatch_queue_t serialQueue;
+
 - (void)performTaskOperator:(TaskOperator *)taskOperator;
 
 @end

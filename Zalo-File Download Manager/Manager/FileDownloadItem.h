@@ -16,13 +16,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *identifier;
 @property (nonatomic, strong) NSString *url;
 @property (nonatomic, strong) void (^progressHandler)(NSString *url, long long bytesWritten, long long totalBytes);
-@property (nonatomic, strong) void (^completionHandler)(NSString *url, NSString *locationPath);
-@property (nonatomic, strong) void (^errorHandler)(NSString *url, NSError *error);
+@property (nonatomic, strong) void (^completionHandler)(NSString *url, NSString *locationPath, NSError *error);
 
 - (instancetype)initWithDownloadUrl:(NSString *)url
                     progressHandler:(void (^)(NSString *url, long long bytesWritten, long long totalBytes))progressHandler
-                  completionHandler:(void (^)(NSString *url, NSString *locationPath))completionHandler
-                       errorHandler:(void (^)(NSString *url, NSError *error))errorHandler;
+                  completionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler;
 
 @end
 

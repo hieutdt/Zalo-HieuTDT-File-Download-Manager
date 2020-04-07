@@ -27,15 +27,13 @@
 
 - (instancetype)initWithDownloadUrl:(NSString *)url
                     progressHandler:(void (^)(NSString *url, long long bytesWritten, long long totalBytes))progressHandler
-                  completionHandler:(void (^)(NSString *url, NSString *locationPath))completionHandler
-                       errorHandler:(void (^)(NSString *url, NSError *error))errorHandler {
+                  completionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler {
     self = [super init];
     if (self) {
         _identifier = [[NSUUID UUID] UUIDString];
         _url = url;
         _progressHandler = progressHandler;
         _completionHandler = completionHandler;
-        _errorHandler = errorHandler;
     }
     return self;
 }

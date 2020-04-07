@@ -14,7 +14,6 @@
 @property (nonatomic, strong) NSMutableArray<TaskOperator *> *highPriorityTasks;
 @property (nonatomic, strong) NSMutableArray<TaskOperator *> *normalPriorityTasks;
 @property (nonatomic, strong) NSMutableArray<TaskOperator *> *lowPriorityTasks;
-@property (nonatomic, strong) dispatch_queue_t serialQueue;
 
 @end
 

@@ -8,6 +8,10 @@
 
 #import "TaskOperator.h"
 
+@interface TaskOperator ()
+
+@end
+
 @implementation TaskOperator
 
 - (instancetype)initWithTaskBlock:(dispatch_block_t)block priority:(TaskPriority)priority {

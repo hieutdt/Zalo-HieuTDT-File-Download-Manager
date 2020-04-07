@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface TaskOperator : NSObject
 
-@property (nonatomic, assign) dispatch_block_t taskBlock;
+@property (nonatomic, strong) dispatch_block_t taskBlock;
 @property (nonatomic, assign) TaskPriority priority;
 
 - (void)execute;

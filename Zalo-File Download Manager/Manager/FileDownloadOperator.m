@@ -10,8 +10,9 @@
 
 @interface FileDownloadOperator () <NSURLSessionDownloadDelegate>
 
-@property (nonatomic, assign) FileDownloadItem *item;
+@property (nonatomic, strong) FileDownloadItem *item;
 @property (nonatomic, strong) NSURLSessionDownloadTask *downloadTask;
+@property (nonatomic, strong) dispatch_queue_t callBackQueue;
 
 @end
 
@@ -25,17 +26,23 @@
 }
 
 - (instancetype)initWithFileDownloadItem:(FileDownloadItem *)item
-                                priority:(TaskPriority)priority {
-    return [self initWithFileDownloadItem:item priority:priority timeOutForRequest:30];
+                                priority:(TaskPriority)priority
+                           callBackQueue:(dispatch_queue_t)callBackQueue {
+    return [self initWithFileDownloadItem:item
+                                 priority:priority
+                        timeOutForRequest:30
+                            callBackQueue:callBackQueue];
 }
 
 - (instancetype)initWithFileDownloadItem:(FileDownloadItem *)item
                                 priority:(TaskPriority)priority
-                       timeOutForRequest:(int)timeOut {
+                       timeOutForRequest:(int)timeOut
+                           callBackQueue:(dispatch_queue_t)callBackQueue {
     self = [super init];
     if (self) {
         _item = item;
         _downloadTask = [self downloadTaskFromUrl:item.url timeOutIntervalForRequest:timeOut];
+        _callBackQueue = callBackQueue;
         
         __weak FileDownloadOperator *weakSelf = self;
         self.priority = priority;
@@ -66,21 +73,28 @@
       downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten
  totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
     if (downloadTask == self.downloadTask && self.item && self.item.progressHandler) {
-        self.item.progressHandler(self.item.url, bytesWritten, totalBytesWritten);
+        dispatch_async(self.callBackQueue, ^{
+            self.item.progressHandler(self.item.url, bytesWritten, totalBytesWritten);
+        });
     }
 }
 
-- (void)URLSession:(NSURLSession *)session
-      downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
-    if (downloadTask == self.downloadTask && self.item && self.item.completionHandler) {
-        self.item.completionHandler(self.item.url, @"");
-    }
+- (void)URLSession:(nonnull NSURLSession *)session
+      downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(nonnull NSURL *)location {
+    
 }
+
 
 - (void)URLSession:(NSURLSession *)session
               task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
-    if (error && self.item && self.item.errorHandler) {
-        self.item.errorHandler(self.item.url, error);
+    if (task && self.item && self.item.completionHandler) {
+        dispatch_async(self.callBackQueue, ^{
+            if (error) {
+                NSLog(@"URL Session error: %@", error.userInfo);
+            }
+            
+            self.item.completionHandler(self.item.url, @"", error);
+        });
     }
 }
 

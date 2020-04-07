@@ -45,7 +45,8 @@
                                                                      completionHandler:completionHandler];
         FileDownloadOperator *downloadOperator = [[FileDownloadOperator alloc] initWithFileDownloadItem:downloadItem
                                                                                                priority:priority
-                                                                                      timeOutForRequest:timeOut];
+                                                                                      timeOutForRequest:timeOut
+                                                                                          callBackQueue:self.serialQueue];
         
         [self.fileOperatorDictionary addEntriesFromDictionary:@{url : downloadOperator}];
         

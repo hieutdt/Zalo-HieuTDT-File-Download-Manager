@@ -18,42 +18,21 @@
 
 @implementation FileDownloadViewModel
 
-- (instancetype)initWithFile:(File *)file {
-    self = [super init];
-    if (self) {
-        _fileName = file.fileName;
-        _state = file.state;
-        _imageName = @"download";
-        _totalBytes = file.totalBytes;
-        _bytesWritten = file.bytesWritten;
-    }
-    return self;
-}
-
 - (instancetype)initWithFileName:(NSString *)fileName
-                           state:(FileDownloadState)state imageName:(NSString *)imageName
+                             url:(NSString *)url
+                           state:(FileDownloadState)state
                       totalBytes:(long long)totalBytes
-                    bytesWritten:(long long)bytesWritten {
+                    bytesWritten:(long long)bytesWritten; {
     self = [super init];
     if (self) {
         _fileName = fileName;
         _state = state;
-        _imageName = @"download";
+        _url = url;
         _totalBytes = totalBytes;
         _bytesWritten = bytesWritten;
+        _progress = 0;
     }
     return self;
-}
-
-- (void)updateByFile:(File *)file {
-    if (!self) {
-        return;
-    }
-    
-    self.fileName = file.fileName;
-    self.state = file.state;
-    self.totalBytes = file.totalBytes;
-    self.bytesWritten = file.bytesWritten;
 }
 
 - (Class)cellClass {
