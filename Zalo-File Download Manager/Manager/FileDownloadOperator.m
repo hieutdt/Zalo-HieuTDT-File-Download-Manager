@@ -181,7 +181,6 @@
                                            didWriteData:(int64_t)bytesWritten
                                       totalBytesWritten:(int64_t)totalBytesWritten
                               totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
-    NSLog(@"On progresss");
     
     if (downloadTask == self.downloadTask && self.item && self.item.progressHandler) {
         dispatch_async(self.callBackQueue, ^{
@@ -198,6 +197,10 @@
         NSURL *savedURL = [documentsURL URLByAppendingPathComponent:location.lastPathComponent];
         
         [fileManager moveItemAtURL:location toURL:savedURL error:nil];
+        
+        dispatch_async(self.callBackQueue, ^{
+            self.item.completionHandler(self.item.url, savedURL.absoluteString, nil);
+        });
     } @catch (NSError *error) {
         NSLog(@"Error: %@", error.userInfo);
     }
