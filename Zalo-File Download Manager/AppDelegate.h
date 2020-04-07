@@ -12,6 +12,7 @@
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (readonly, strong) NSPersistentContainer *persistentContainer;
+@property (nonatomic, strong) dispatch_block_t backgroundCompletionHandler;
 
 - (void)saveContext;
 

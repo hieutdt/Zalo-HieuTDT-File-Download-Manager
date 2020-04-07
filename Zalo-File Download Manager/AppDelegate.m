@@ -37,6 +37,11 @@
     // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
 }
 
+- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier
+                                                                   completionHandler:(void (^)(void))completionHandler {
+    _backgroundCompletionHandler = completionHandler;
+}
+
 
 #pragma mark - Core Data stack
 

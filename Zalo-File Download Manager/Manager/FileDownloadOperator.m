@@ -8,8 +8,9 @@
 
 #import "FileDownloadOperator.h"
 #import "DownloadDataCache.h"
+#import "AppDelegate.h"
 
-@interface FileDownloadOperator () <NSURLSessionDownloadDelegate>
+@interface FileDownloadOperator () <NSURLSessionDownloadDelegate, NSURLSessionDelegate>
 
 @property (nonatomic, strong) FileDownloadItem *item;
 @property (nonatomic, strong) NSURLSessionDownloadTask *downloadTask;
@@ -146,8 +147,10 @@
 
 - (NSURLSessionDownloadTask *)downloadTaskFromUrl:(NSString *)url
                         timeOutIntervalForRequest:(int)timeOut {
-    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@", self.item.url]];
     configuration.timeoutIntervalForRequest = timeOut;
+    configuration.discretionary = YES;
+    configuration.sessionSendsLaunchEvents = YES;
     
     NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
@@ -161,8 +164,10 @@
     if (!resumeData)
         return nil;
     
-    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"FileDownloadOperator"];
     configuration.timeoutIntervalForRequest = timeOut;
+    configuration.discretionary = YES;
+    configuration.sessionSendsLaunchEvents = YES;
 
     NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
     
@@ -170,7 +175,7 @@
     return downloadTask;
 }
 
-#pragma mark - NSURLSessionDelegate
+#pragma mark - NSURLSessionDownloadDelegate
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
                                            didWriteData:(int64_t)bytesWritten
@@ -185,9 +190,17 @@
     }
 }
 
-- (void)URLSession:(nonnull NSURLSession *)session
-      downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(nonnull NSURL *)location {
-    
+- (void)URLSession:(nonnull NSURLSession *)session downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask
+                                      didFinishDownloadingToURL:(nonnull NSURL *)location {
+    @try {
+        NSFileManager *fileManager = NSFileManager.defaultManager;
+        NSURL *documentsURL = [fileManager URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
+        NSURL *savedURL = [documentsURL URLByAppendingPathComponent:location.lastPathComponent];
+        
+        [fileManager moveItemAtURL:location toURL:savedURL error:nil];
+    } @catch (NSError *error) {
+        NSLog(@"Error: %@", error.userInfo);
+    }
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
@@ -200,6 +213,18 @@
             self.item.completionHandler(self.item.url, @"", error);
         });
     }
+}
+
+#pragma mark - NSURLSessionDelegate
+
+- (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        AppDelegate *appDelegate =  (AppDelegate *)[UIApplication.sharedApplication delegate];
+        if (appDelegate) {
+            dispatch_block_t backgroundCompletionHandler = appDelegate.backgroundCompletionHandler;
+            backgroundCompletionHandler();
+        }
+    });
 }
 
 @end

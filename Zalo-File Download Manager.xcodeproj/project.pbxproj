@@ -18,12 +18,8 @@
 		0417EF44242DD0CA00587BE1 /* Zalo_File_Download_ManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF43242DD0CA00587BE1 /* Zalo_File_Download_ManagerTests.m */; };
 		0417EF55242DD15300587BE1 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF54242DD15300587BE1 /* MainViewController.m */; };
 		0417EF56242DD15300587BE1 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF54242DD15300587BE1 /* MainViewController.m */; };
-		0417EF67242DE7D600587BE1 /* FileDownloadAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF66242DE7D600587BE1 /* FileDownloadAdapter.m */; };
-		0417EF68242DE7D600587BE1 /* FileDownloadAdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF66242DE7D600587BE1 /* FileDownloadAdapter.m */; };
 		0417EF6B242DE7E900587BE1 /* File.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF6A242DE7E900587BE1 /* File.m */; };
 		0417EF6C242DE7E900587BE1 /* File.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF6A242DE7E900587BE1 /* File.m */; };
-		0417EF6F242E165300587BE1 /* FileDownloadBusiness.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF6E242E165300587BE1 /* FileDownloadBusiness.m */; };
-		0417EF70242E165300587BE1 /* FileDownloadBusiness.m in Sources */ = {isa = PBXBuildFile; fileRef = 0417EF6E242E165300587BE1 /* FileDownloadBusiness.m */; };
 		043E163C24323B63003CDE74 /* NICommonMetrics.m in Sources */ = {isa = PBXBuildFile; fileRef = 043E15F924323B63003CDE74 /* NICommonMetrics.m */; };
 		043E163D24323B63003CDE74 /* NIViewRecycler.m in Sources */ = {isa = PBXBuildFile; fileRef = 043E15FA24323B63003CDE74 /* NIViewRecycler.m */; };
 		043E163E24323B63003CDE74 /* NIOperations.m in Sources */ = {isa = PBXBuildFile; fileRef = 043E15FE24323B63003CDE74 /* NIOperations.m */; };
@@ -99,12 +95,8 @@
 		0417EF45242DD0CA00587BE1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0417EF53242DD15300587BE1 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
 		0417EF54242DD15300587BE1 /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
-		0417EF65242DE7D600587BE1 /* FileDownloadAdapter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadAdapter.h; sourceTree = "<group>"; };
-		0417EF66242DE7D600587BE1 /* FileDownloadAdapter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileDownloadAdapter.m; sourceTree = "<group>"; };
 		0417EF69242DE7E900587BE1 /* File.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = File.h; sourceTree = "<group>"; };
 		0417EF6A242DE7E900587BE1 /* File.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = File.m; sourceTree = "<group>"; };
-		0417EF6D242E165300587BE1 /* FileDownloadBusiness.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadBusiness.h; sourceTree = "<group>"; };
-		0417EF6E242E165300587BE1 /* FileDownloadBusiness.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileDownloadBusiness.m; sourceTree = "<group>"; };
 		043E15F824323B63003CDE74 /* NINonEmptyCollectionTesting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NINonEmptyCollectionTesting.h; sourceTree = "<group>"; };
 		043E15F924323B63003CDE74 /* NICommonMetrics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NICommonMetrics.m; sourceTree = "<group>"; };
 		043E15FA24323B63003CDE74 /* NIViewRecycler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NIViewRecycler.m; sourceTree = "<group>"; };
@@ -234,8 +226,6 @@
 				045A31252438C76C00F9E887 /* Base */,
 				045A31242438C75C00F9E887 /* Manager */,
 				0417EF4E242DD10C00587BE1 /* Pressentation */,
-				0417EF4F242DD11400587BE1 /* Business */,
-				0417EF50242DD11A00587BE1 /* DataAccess */,
 				0417EF57242DDF2800587BE1 /* Models */,
 				04F79D7D24336F6300517235 /* Helper */,
 				043E165E24323C2C003CDE74 /* AppConsts.h */,
@@ -268,24 +258,6 @@
 				0417EF51242DD12C00587BE1 /* Fragments */,
 			);
 			path = Pressentation;
-			sourceTree = "<group>";
-		};
-		0417EF4F242DD11400587BE1 /* Business */ = {
-			isa = PBXGroup;
-			children = (
-				0417EF6D242E165300587BE1 /* FileDownloadBusiness.h */,
-				0417EF6E242E165300587BE1 /* FileDownloadBusiness.m */,
-			);
-			path = Business;
-			sourceTree = "<group>";
-		};
-		0417EF50242DD11A00587BE1 /* DataAccess */ = {
-			isa = PBXGroup;
-			children = (
-				0417EF65242DE7D600587BE1 /* FileDownloadAdapter.h */,
-				0417EF66242DE7D600587BE1 /* FileDownloadAdapter.m */,
-			);
-			path = DataAccess;
 			sourceTree = "<group>";
 		};
 		0417EF51242DD12C00587BE1 /* Fragments */ = {
@@ -594,7 +566,6 @@
 				04E84FB924323F5C004557A3 /* FileDownloadCell.m in Sources */,
 				043E165824323B63003CDE74 /* NIFormCellCatalog.m in Sources */,
 				0417EF29242DD0CA00587BE1 /* SceneDelegate.m in Sources */,
-				0417EF6F242E165300587BE1 /* FileDownloadBusiness.m in Sources */,
 				043E164B24323B63003CDE74 /* NIDebuggingTools.m in Sources */,
 				043E165024323B63003CDE74 /* NICellCatalog.m in Sources */,
 				043E164024323B63003CDE74 /* NIDeviceOrientation.m in Sources */,
@@ -605,7 +576,6 @@
 				043E164324323B63003CDE74 /* NINonRetainingCollections.m in Sources */,
 				043E164224323B63003CDE74 /* UIResponder+NimbusCore.m in Sources */,
 				040F461E2432E76E00321B75 /* FileDownloadTableViewModel.m in Sources */,
-				0417EF67242DE7D600587BE1 /* FileDownloadAdapter.m in Sources */,
 				043E164F24323B63003CDE74 /* NISDKAvailability.m in Sources */,
 				04E165DA2439A330006FE6F1 /* FileDownloadOperator.m in Sources */,
 				043E164924323B63003CDE74 /* NIPaths.m in Sources */,
@@ -637,9 +607,7 @@
 				040F461F2432E76E00321B75 /* FileDownloadTableViewModel.m in Sources */,
 				04E84FBA24323F5C004557A3 /* FileDownloadCell.m in Sources */,
 				045A31292438C78000F9E887 /* TaskOperator.m in Sources */,
-				0417EF70242E165300587BE1 /* FileDownloadBusiness.m in Sources */,
 				0417EF56242DD15300587BE1 /* MainViewController.m in Sources */,
-				0417EF68242DE7D600587BE1 /* FileDownloadAdapter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
