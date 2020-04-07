@@ -74,7 +74,7 @@
  totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
     if (downloadTask == self.downloadTask && self.item && self.item.progressHandler) {
         dispatch_async(self.callBackQueue, ^{
-            self.item.progressHandler(self.item.url, bytesWritten, totalBytesWritten);
+            self.item.progressHandler(self.item.url, totalBytesWritten, totalBytesExpectedToWrite);
         });
     }
 }

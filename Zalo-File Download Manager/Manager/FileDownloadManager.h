@@ -23,6 +23,11 @@ NS_ASSUME_NONNULL_BEGIN
                    progressHandler:(void (^)(NSString *url, long long bytesWritten, long long totalBytes))progressHandler
                  completionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler;
 
+- (void)pauseDownloadFileWithUrl:(NSString *)url
+priority:(TaskPriority)priority
+sameUrlFilesLeft:(unsigned long)leftCount
+completionHandler:(void (^)(NSString *url, ))
+
 @end
 
 NS_ASSUME_NONNULL_END

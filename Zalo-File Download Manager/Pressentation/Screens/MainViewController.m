@@ -40,8 +40,21 @@
     
     _fileViewModels = [[NSMutableArray alloc] init];
     _urlHashMap = [[NSMutableDictionary alloc] init];
+    
+    NSArray *urls = @[
+        @"http://ovh.net/files/1Mio.dat",
+        @"http://ovh.net/files/1Mio.dat",
+        @"http://ovh.net/files/10Mio.dat",
+        @"http://ovh.net/files/10Mio.dat",
+        @"http://ovh.net/files/100Mio.dat"
+    ];
+    
     for (int i = 0; i < 5; i++) {
-        FileDownloadViewModel *viewModel = [[FileDownloadViewModel alloc] initWithFileName:[NSString stringWithFormat:@"Tập tin %d", i] url:@"" state:FileDownloading totalBytes:0 bytesWritten:0];
+        FileDownloadViewModel *viewModel = [[FileDownloadViewModel alloc] initWithFileName:[NSString stringWithFormat:@"Tập tin %d", i]
+                                                                                       url:urls[i]
+                                                                                     state:FileDownloading
+                                                                                totalBytes:0
+                                                                              bytesWritten:0];
         [self.fileViewModels addObject:viewModel];
         
         NSMutableArray *hashMapObject = [_urlHashMap valueForKey:viewModel.url];
@@ -64,32 +77,33 @@
         if (hashMapObject) {
             for (int i = 0; i < hashMapObject.count; i++) {
                 int index = (int)[weakSelf.fileViewModels indexOfObject:hashMapObject[i]];
-                [weakSelf updateCellAtIndex:index withState:FileDownloading bytesWritten:bytesWritten totalBytes:totalBytes];
+                [weakSelf updateCellAtIndex:index
+                                  withState:FileDownloading
+                               bytesWritten:bytesWritten
+                                 totalBytes:totalBytes];
             }
         }
     };
     
     _completionHandler = ^(NSString *url, NSString *locationPath, NSError *error) {
-        
+        NSMutableArray<FileDownloadViewModel *> *hashMapObject = [weakSelf.urlHashMap objectForKey:url];
+        if (hashMapObject) {
+            for (int i = 0; i < hashMapObject.count; i++) {
+                int index = (int)[weakSelf.fileViewModels indexOfObject:hashMapObject[i]];
+                if (error) {
+                    [weakSelf updateCellAtIndex:index
+                                      withState:FileDownloadCancel
+                                   bytesWritten:weakSelf.fileViewModels[index].bytesWritten
+                                     totalBytes:weakSelf.fileViewModels[index].totalBytes];
+                } else {
+                    [weakSelf updateCellAtIndex:index
+                                      withState:FileDownloadFinish
+                                   bytesWritten:weakSelf.fileViewModels[index].bytesWritten
+                                     totalBytes:weakSelf.fileViewModels[index].totalBytes];
+                }
+            }
+        }
     };
-    
-//    for (unsigned long i = 0; i < self.downloadFiles.count; i++) {
-//        [self.progressHandlers addObject:^(unsigned long index, long long bytesWritten, long long totalBytes) {
-//            if (index < self.downloadFiles.count) {
-//                // Only update ui if the download is more than 1MB to avoid high CPU if reload cell too much
-//                if (bytesWritten - self.downloadFiles[index].bytesWritten < 1024 * 1024)
-//                    return;
-//
-//                [weakSelf updateCellAtIndex:(int)index withState:FileDownloading bytesWritten:bytesWritten totalBytes:totalBytes];
-//            }
-//        }];
-//
-//        [self.completionHandlers addObject:^(NSError *error, unsigned long index) {
-//            if (index < self.downloadFiles.count) {
-//                [weakSelf updateCellAtIndex:(int)index withState:FileDownloadFinish bytesWritten:weakSelf.downloadFiles[index].totalBytes totalBytes:weakSelf.downloadFiles[index].totalBytes];
-//            }
-//        }];
-//    }
     
     [self initAndLayoutView];
 }
@@ -184,6 +198,16 @@
 //            }
 //        }];
 //    }
+    
+    if (index >= self.fileViewModels.count)
+        return;
+    
+    // Pause or Cancel if failed
+    if (self.fileViewModels[index].state == FileDownloading) {
+        NSMutableArray *hashMapObject = [self.urlHashMap objectForKey:self.fileViewModels[index].url];
+        unsigned long leftCount = hashMapObject.count - 1;
+        
+    }
 }
 
 - (void)resumeDownloadFileAtIndex:(int)index {
