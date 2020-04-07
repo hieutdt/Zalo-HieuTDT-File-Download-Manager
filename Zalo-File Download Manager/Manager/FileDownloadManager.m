@@ -18,6 +18,14 @@
 
 @implementation FileDownloadManager
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _fileOperatorDictionary = [[NSMutableDictionary alloc] init];
+    }
+    return self;
+}
+
 + (instancetype)instance {
     static FileDownloadManager *sharedInstance = nil;
     static dispatch_once_t onceToken;
@@ -52,6 +60,26 @@
         
         [self performTaskOperator:downloadOperator];
     }
+}
+
+- (void)pauseDownloadFileWithUrl:(NSString *)url
+                        priority:(TaskPriority)priority
+                sameUrlFilesLeft:(unsigned long)leftCount
+               completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
+    if (!url || !completionHandler)
+        return;
+    
+    if (leftCount > 0) {
+        completionHandler(url, nil);
+        return;
+    }
+    
+    FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
+    [downloadOperator updateTaskToStopDownloadWithPriority:TaskPriorityHigh completionHandler:^(NSString * _Nonnull url, NSError *error) {
+        completionHandler(url, error);
+    } callBackQueue:self.serialQueue];
+    
+    [self performTaskOperator:downloadOperator];
 }
 
 @end

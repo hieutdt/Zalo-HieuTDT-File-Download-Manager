@@ -77,10 +77,12 @@
         if (hashMapObject) {
             for (int i = 0; i < hashMapObject.count; i++) {
                 int index = (int)[weakSelf.fileViewModels indexOfObject:hashMapObject[i]];
-                [weakSelf updateCellAtIndex:index
-                                  withState:FileDownloading
-                               bytesWritten:bytesWritten
-                                 totalBytes:totalBytes];
+                if (weakSelf.fileViewModels[index].state == FileDownloading) {
+                    [weakSelf updateCellAtIndex:index
+                                      withState:FileDownloading
+                                   bytesWritten:bytesWritten
+                                     totalBytes:totalBytes];
+                }
             }
         }
     };
@@ -90,16 +92,18 @@
         if (hashMapObject) {
             for (int i = 0; i < hashMapObject.count; i++) {
                 int index = (int)[weakSelf.fileViewModels indexOfObject:hashMapObject[i]];
-                if (error) {
-                    [weakSelf updateCellAtIndex:index
-                                      withState:FileDownloadCancel
-                                   bytesWritten:weakSelf.fileViewModels[index].bytesWritten
-                                     totalBytes:weakSelf.fileViewModels[index].totalBytes];
-                } else {
-                    [weakSelf updateCellAtIndex:index
-                                      withState:FileDownloadFinish
-                                   bytesWritten:weakSelf.fileViewModels[index].bytesWritten
-                                     totalBytes:weakSelf.fileViewModels[index].totalBytes];
+                if (weakSelf.fileViewModels[index].state == FileDownloading) {
+                    if (error) {
+                        [weakSelf updateCellAtIndex:index
+                                          withState:FileDownloadCancel
+                                       bytesWritten:weakSelf.fileViewModels[index].bytesWritten
+                                         totalBytes:weakSelf.fileViewModels[index].totalBytes];
+                    } else {
+                        [weakSelf updateCellAtIndex:index
+                                          withState:FileDownloadFinish
+                                       bytesWritten:weakSelf.fileViewModels[index].bytesWritten
+                                         totalBytes:weakSelf.fileViewModels[index].totalBytes];
+                    }
                 }
             }
         }
@@ -163,11 +167,16 @@
     if (self.isScrolling)
         return;
     
-    float progress = bytesWritten * 1.0 / totalBytes;
-    progress *= 40;
-    progress /= 40;
+    float progress = 0;
+    if (totalBytes > 0) {
+        progress = bytesWritten * 1.0 / totalBytes;
+        progress = roundf(progress * 40) / 40;
+    } else {
+        progress = 0;
+    }
     
-    if (progress > weakSelf.fileViewModels[index].progress) {
+    if ((progress > weakSelf.fileViewModels[index].progress && state == FileDownloading)
+        || state != FileDownloading) {
         weakSelf.fileViewModels[index].progress = progress;
         
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -185,20 +194,6 @@
 #pragma mark - DownloadFileActionMethod
 
 - (void)pauseDownloadFileAtIndex:(int)index {
-//    if (index >= self.downloadFiles.count)
-//        return;
-//
-//    if (self.downloadFiles[index].state == FileDownloading) {
-//        // Pause or cancel if failed
-//        [self.fileDownloadBusiness pauseDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
-//            if (!error) {
-//                [self updateCellAtIndex:index withState:FileDownloadPause bytesWritten:self.downloadFiles[index].bytesWritten totalBytes:self.downloadFiles[index].totalBytes];
-//            } else {
-//                [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
-//            }
-//        }];
-//    }
-    
     if (index >= self.fileViewModels.count)
         return;
     
@@ -206,7 +201,24 @@
     if (self.fileViewModels[index].state == FileDownloading) {
         NSMutableArray *hashMapObject = [self.urlHashMap objectForKey:self.fileViewModels[index].url];
         unsigned long leftCount = hashMapObject.count - 1;
-        
+        [[FileDownloadManager instance] pauseDownloadFileWithUrl:self.fileViewModels[index].url
+                                                        priority:TaskPriorityHigh
+                                                sameUrlFilesLeft:leftCount
+                                               completionHandler:^(NSString * _Nonnull url, NSError *error) {
+            if (!url)
+                return;
+            if ([url isEqualToString:self.fileViewModels[index].url]) {
+                if (!error) {
+                    [self updateCellAtIndex:index
+                                  withState:FileDownloadPause
+                               bytesWritten:self.fileViewModels[index].bytesWritten
+                                 totalBytes:self.fileViewModels[index].totalBytes];
+                } else {
+                    NSLog(@"Error: %@", error.userInfo);
+                    [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:0];
+                }
+            }
+        }];
     }
 }
 
@@ -263,12 +275,27 @@
     if (index >= self.fileViewModels.count)
         return;
     
-//    File *file = self.downloadFiles[index];
-//    NSString *message = @"";
-//    UIAlertAction *firstAction = nil;
-//    UIAlertAction *secondAction = nil;
-//    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Huỷ" style:UIAlertActionStyleCancel handler:nil];
-//
+    FileDownloadViewModel *viewModel = self.fileViewModels[index];
+    NSString *message = @"";
+    UIAlertAction *firstAction = nil;
+    UIAlertAction *secondAction = nil;
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Huỷ" style:UIAlertActionStyleCancel handler:nil];
+
+    if (viewModel.state == FileDownloading) {
+        message = [NSString stringWithFormat:@"%@ đang được tải. Bạn có muốn?", viewModel.fileName];;
+        firstAction = [UIAlertAction actionWithTitle:@"Tạm dừng"
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction * _Nonnull action) {
+            [self pauseDownloadFileAtIndex:index];
+        }];
+
+        secondAction = [UIAlertAction actionWithTitle:@"Kết thúc"
+                                                style:UIAlertActionStyleDefault
+                                              handler:^(UIAlertAction * _Nonnull action) {
+            [self cancelDownloadFileAtIndex:index];
+        }];
+    }
+    
 //    if (file.state == FileDownloading) {
 //        message = [NSString stringWithFormat:@"%@ đang được tải. Bạn có muốn?", file.fileName];
 //        firstAction = [UIAlertAction actionWithTitle:@"Tạm dừng" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -298,16 +325,16 @@
 //    } else
 //        return;
 //
-//    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Thông báo" message:message preferredStyle:UIAlertControllerStyleActionSheet];
-//
-//    if (firstAction)
-//        [alert addAction:firstAction];
-//    if (secondAction)
-//        [alert addAction:secondAction];
-//    if (cancelAction)
-//        [alert addAction:cancelAction];
-//
-//    [self presentViewController:alert animated:YES completion:nil];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Thông báo" message:message preferredStyle:UIAlertControllerStyleActionSheet];
+
+    if (firstAction)
+        [alert addAction:firstAction];
+    if (secondAction)
+        [alert addAction:secondAction];
+    if (cancelAction)
+        [alert addAction:cancelAction];
+
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)scrollViewDidBeginScroll {

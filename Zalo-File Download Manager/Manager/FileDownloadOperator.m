@@ -7,6 +7,7 @@
 //
 
 #import "FileDownloadOperator.h"
+#import "DownloadDataCache.h"
 
 @interface FileDownloadOperator () <NSURLSessionDownloadDelegate>
 
@@ -55,6 +56,28 @@
     return self;
 }
 
+- (void)updateTaskToStopDownloadWithPriority:(TaskPriority)priority
+                           completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
+                               callBackQueue:(dispatch_queue_t)callBackQueue {
+    __weak FileDownloadOperator *weakSelf = self;
+    self.priority = priority;
+    self.taskBlock = ^{
+        if (weakSelf.downloadTask) {
+            [weakSelf.downloadTask cancelByProducingResumeData:^(NSData *resumeData) {
+                if (resumeData) {
+                    [[DownloadDataCache instance] setData:resumeData forKey:weakSelf.item.identifier];
+                    completionHandler(weakSelf.item.url, nil);
+                } else {
+                    NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
+                                                                code:ERROR_GET_RESUME_DATA_FAILED
+                                                            userInfo:@{@"Tạm dừng download thất bại!": NSLocalizedDescriptionKey}];
+                    completionHandler(weakSelf.item.url, error);
+                }
+            }];
+        }
+    };
+}
+
 - (NSURLSessionDownloadTask *)downloadTaskFromUrl:(NSString *)url
                         timeOutIntervalForRequest:(int)timeOut {
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -69,9 +92,10 @@
 
 #pragma mark - NSURLSessionDelegate
 
-- (void)URLSession:(NSURLSession *)session
-      downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten
- totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
+                                           didWriteData:(int64_t)bytesWritten
+                                      totalBytesWritten:(int64_t)totalBytesWritten
+                              totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
     if (downloadTask == self.downloadTask && self.item && self.item.progressHandler) {
         dispatch_async(self.callBackQueue, ^{
             self.item.progressHandler(self.item.url, totalBytesWritten, totalBytesExpectedToWrite);
@@ -84,9 +108,8 @@
     
 }
 
-
-- (void)URLSession:(NSURLSession *)session
-              task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
+                           didCompleteWithError:(NSError *)error {
     if (task && self.item && self.item.completionHandler) {
         dispatch_async(self.callBackQueue, ^{
             if (error) {

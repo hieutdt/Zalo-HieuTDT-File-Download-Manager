@@ -11,7 +11,7 @@
 
 @interface DownloadDataCache ()
 
-@property (nonatomic, strong) NSCache<NSURLSessionDownloadTask *, NSData *> *dataCache;
+@property (nonatomic, strong) NSCache<NSString *, NSData *> *dataCache;
 
 @end
 
@@ -35,25 +35,25 @@
     return sharedInstance;
 }
 
-- (void)setData:(NSData *)resumeData forDownloadTask:(NSURLSessionDownloadTask *)task {
-    if (!resumeData || !task)
+- (void)setData:(NSData *)data forKey:(NSString *)key {
+    if (!data || !key)
         return;
     
-    [self.dataCache setObject:resumeData forKey:task];
+    [self.dataCache setObject:data forKey:key];
 }
 
-- (NSData *)dataForDownloadTask:(NSURLSessionDownloadTask *)task {
-    if (!task)
+- (NSData *)dataForKey:(NSString *)key {
+    if (!key)
         return nil;
     
-    return [self.dataCache objectForKey:task];
+    return [self.dataCache objectForKey:key];
 }
 
-- (void)removeDataForDownloadTask:(NSURLSessionDownloadTask *)task {
-    if (!task)
+- (void)removeDataByKey:(NSString *)key {
+    if (!key)
         return;
     
-    [self.dataCache removeObjectForKey:task];
+    [self.dataCache removeObjectForKey:key];
 }
 
 - (void)removeAllDatas {

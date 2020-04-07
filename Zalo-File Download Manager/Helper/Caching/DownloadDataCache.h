@@ -14,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)instance;
 
-- (NSData *)dataForDownloadTask:(NSURLSessionDownloadTask *)task;
-- (void)setData:(NSData *)resumeData forDownloadTask:(NSURLSessionDownloadTask *)task;
-- (void)removeDataForDownloadTask:(NSURLSessionDownloadTask *)task;
+- (NSData *)dataForKey:(NSString *)key;
+- (void)setData:(NSData *)data forKey:(NSString *)key;
+- (void)removeDataByKey:(NSString *)key;
 - (void)removeAllDatas;
 
 @end

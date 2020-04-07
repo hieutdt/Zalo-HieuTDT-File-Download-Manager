@@ -24,6 +24,10 @@ NS_ASSUME_NONNULL_BEGIN
                        timeOutForRequest:(int)timeOut
                            callBackQueue:(dispatch_queue_t)callBackQueue;
 
+- (void)updateTaskToStopDownloadWithPriority:(TaskPriority)priority
+                           completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
+                               callBackQueue:(dispatch_queue_t)callBackQueue;
+
 @end
 
 NS_ASSUME_NONNULL_END
