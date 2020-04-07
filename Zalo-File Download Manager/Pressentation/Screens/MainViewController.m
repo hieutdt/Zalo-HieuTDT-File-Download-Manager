@@ -160,10 +160,6 @@
     if (index >= weakSelf.fileViewModels.count)
         return;
     
-    weakSelf.fileViewModels[index].state = state;
-    weakSelf.fileViewModels[index].bytesWritten = bytesWritten;
-    weakSelf.fileViewModels[index].totalBytes = totalBytes;
-    
     if (self.isScrolling)
         return;
     
@@ -175,8 +171,12 @@
         progress = 0;
     }
     
-    if ((progress > weakSelf.fileViewModels[index].progress && state == FileDownloading)
-        || state != FileDownloading) {
+    if ((progress > weakSelf.fileViewModels[index].progress && weakSelf.fileViewModels[index].state == FileDownloading)
+        || state != weakSelf.fileViewModels[index].state) {
+        
+        weakSelf.fileViewModels[index].state = state;
+        weakSelf.fileViewModels[index].bytesWritten = bytesWritten;
+        weakSelf.fileViewModels[index].totalBytes = totalBytes;
         weakSelf.fileViewModels[index].progress = progress;
         
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -199,11 +199,18 @@
     
     // Pause or Cancel if failed
     if (self.fileViewModels[index].state == FileDownloading) {
-        NSMutableArray *hashMapObject = [self.urlHashMap objectForKey:self.fileViewModels[index].url];
-        unsigned long leftCount = hashMapObject.count - 1;
+        int sameUrlRunningTaskCount = [self getSameUrlRunningTasksCount:self.fileViewModels[index].url];
+        
+        if (sameUrlRunningTaskCount > 1) {
+            [self updateCellAtIndex:index
+                          withState:FileDownloadPause
+                       bytesWritten:self.fileViewModels[index].bytesWritten
+                         totalBytes:self.fileViewModels[index].totalBytes];
+            return;
+        }
+        
         [[FileDownloadManager instance] pauseDownloadFileWithUrl:self.fileViewModels[index].url
                                                         priority:TaskPriorityHigh
-                                                sameUrlFilesLeft:leftCount
                                                completionHandler:^(NSString * _Nonnull url, NSError *error) {
             if (!url)
                 return;
@@ -223,50 +230,97 @@
 }
 
 - (void)resumeDownloadFileAtIndex:(int)index {
-//    if (index >= self.downloadFiles.count)
-//           return;
-//
-//    if (self.downloadFiles[index].state == FileDownloadPause) {
-//        // Resume
-//        [self.fileDownloadBusiness resumeDownloadTaskAtIndex:index withProgressHandler:^(unsigned long index, long long bytesWritten, long long totalBytes) {
-//            self.progressHandlers[index](index, bytesWritten, totalBytes);
-//
-//        } downloadCompleteHandler:^(NSError *error, unsigned long index) {
-//            self.completionHandlers[index](error, index);
-//
-//        } resumeCompletionHandler:^(NSError *error) {
-//            if (error) {
-//                [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
-//            } else {
-//                [self updateCellAtIndex:index withState:FileDownloading bytesWritten:self.downloadFiles[index].bytesWritten totalBytes:self.downloadFiles[index].totalBytes];
-//            }
-//        }];
-//    }
+    if (index >= self.fileViewModels.count)
+        return;
+    
+    if (self.fileViewModels[index].state == FileDownloadPause) {
+        int sameUrlRunningTaskCount = [self getSameUrlRunningTasksCount:self.fileViewModels[index].url];
+        
+        if (sameUrlRunningTaskCount > 0) {
+            [self updateCellAtIndex:index
+                          withState:FileDownloading
+                       bytesWritten:self.fileViewModels[index].bytesWritten
+                         totalBytes:self.fileViewModels[index].totalBytes];
+            return;
+        }
+        
+        [[FileDownloadManager instance] resumeDownloadFileWithUrl:self.fileViewModels[index].url
+                                                         priority:TaskPriorityNormal
+                                                completionHandler:^(NSString * _Nonnull url, NSError *error) {
+            if (!url)
+                return;
+            if ([url isEqualToString:self.fileViewModels[index].url]) {
+                if (!error) {
+                    [self updateCellAtIndex:index
+                                  withState:FileDownloading
+                               bytesWritten:self.fileViewModels[index].bytesWritten
+                                 totalBytes:self.fileViewModels[index].totalBytes];
+                } else {
+                    NSLog(@"Error: %@", error.userInfo);
+                    [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:0];
+                }
+            }
+        }];
+    }
 }
 
 - (void)cancelDownloadFileAtIndex:(int)index {
-//    if (index >= self.downloadFiles.count)
-//        return;
-//
-//    [self.fileDownloadBusiness cancelDownloadTaskAtIndex:index withCompletionHandler:^(NSError *error) {
-//        if (!error) {
-//            [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
-//        }
-//    }];
+    if (index >= self.fileViewModels.count)
+        return;
+    
+    if (self.fileViewModels[index].state == FileDownloading
+        || self.fileViewModels[index].state == FileDownloadPause) {
+        int sameUrlRunningTaskCount = [self getSameUrlRunningTasksCount:self.fileViewModels[index].url];
+        if (sameUrlRunningTaskCount > 1) {
+            [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:0];
+            return;
+        }
+        
+        [[FileDownloadManager instance] cancelDownloadFileWithUrl:self.fileViewModels[index].url
+                                                         priority:TaskPriorityHigh
+                                                completionHandler:^(NSString * _Nonnull url) {
+            [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:0];
+        }];
+    }
 }
-
+    
 - (void)retryDownloadFileAtIndex:(int)index {
-//    if (index >= self.downloadFiles.count)
-//        return;
-//
-//    if (self.downloadFiles[index].state == FileDownloadCancel) {
-//       //Retry
-//       [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:self.downloadFiles[index].totalBytes];
-//
-//       [self.fileDownloadBusiness retryDownloadFile:self.downloadFiles[index] atIndex:index withProgressHandler:self.progressHandlers[index] downloadCompleteHandler:self.completionHandlers[index]];
-//    }
+    if (index >= self.fileViewModels.count)
+        return;
+    
+    if (self.fileViewModels[index].state == FileDownloadCancel) {
+        int sameUrlRunningTaskCount = [self getSameUrlRunningTasksCount:self.fileViewModels[index].url];
+        
+        if (sameUrlRunningTaskCount > 0) {
+            [self updateCellAtIndex:index
+                          withState:FileDownloading
+                       bytesWritten:self.fileViewModels[index].bytesWritten
+                         totalBytes:self.fileViewModels[index].totalBytes];
+            return;
+        }
+        
+        [[FileDownloadManager instance] retryDownloadFileWithUrl:self.fileViewModels[index].url
+                                                        priority:TaskPriorityNormal
+                                               completionHandler:^(NSString * _Nonnull url, NSError *error) {
+            if (!error) {
+                [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:0];
+            } else {
+                // Show notification
+            }
+        }];
+    }
 }
 
+- (int)getSameUrlRunningTasksCount:(NSString *)url {
+    NSMutableArray<FileDownloadViewModel *> *hashMapObject = [self.urlHashMap objectForKey:url];
+    
+    int sameUrlRunningTaskCount = 0;
+    for (int i = 0; i < hashMapObject.count; i++) {
+        if (hashMapObject[i].state == FileDownloading)
+            sameUrlRunningTaskCount++;
+    }
+    return sameUrlRunningTaskCount;
+}
 
 #pragma mark - FileDownloadTableViewModelDelegateProtocol
 
@@ -294,37 +348,30 @@
                                               handler:^(UIAlertAction * _Nonnull action) {
             [self cancelDownloadFileAtIndex:index];
         }];
+    } else if (viewModel.state == FileDownloadPause) {
+        message = [NSString stringWithFormat:@"%@ đang tạm ngừng tải xuống. Bạn có muốn?", viewModel.fileName];
+        firstAction = [UIAlertAction actionWithTitle:@"Tiếp tục"
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction * _Nonnull action) {
+            [self resumeDownloadFileAtIndex:index];
+        }];
+
+        secondAction = [UIAlertAction actionWithTitle:@"Kết thúc"
+                                                style:UIAlertActionStyleDefault
+                                              handler:^(UIAlertAction * _Nonnull action) {
+            [self cancelDownloadFileAtIndex:index];
+        }];
+    } else if (viewModel.state == FileDownloadCancel) {
+            message = [NSString stringWithFormat:@"%@ đã bị hủy tải xuống. Bạn có muốn?", viewModel.fileName];
+            firstAction = [UIAlertAction actionWithTitle:@"Thử lại"
+                                                   style:UIAlertActionStyleDefault
+                                                 handler:^(UIAlertAction * _Nonnull action) {
+                [self retryDownloadFileAtIndex:index];
+            }];
+    } else {
+        return;
     }
     
-//    if (file.state == FileDownloading) {
-//        message = [NSString stringWithFormat:@"%@ đang được tải. Bạn có muốn?", file.fileName];
-//        firstAction = [UIAlertAction actionWithTitle:@"Tạm dừng" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-//            [self pauseDownloadFileAtIndex:index];
-//        }];
-//
-//        secondAction = [UIAlertAction actionWithTitle:@"Kết thúc" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-//            [self cancelDownloadFileAtIndex:index];
-//        }];
-//
-//    } else if (file.state == FileDownloadPause) {
-//        message = [NSString stringWithFormat:@"%@ đang tạm ngừng tải xuống. Bạn có muốn?", file.fileName];
-//        firstAction = [UIAlertAction actionWithTitle:@"Tiếp tục" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-//            [self resumeDownloadFileAtIndex:index];
-//        }];
-//
-//        secondAction = [UIAlertAction actionWithTitle:@"Kết thúc" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-//            [self cancelDownloadFileAtIndex:index];
-//        }];
-//
-//    } else if (file.state == FileDownloadCancel) {
-//        message = [NSString stringWithFormat:@"%@ đã bị hủy tải xuống. Bạn có muốn?", file.fileName];
-//        firstAction = [UIAlertAction actionWithTitle:@"Thử lại" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-//            [self retryDownloadFileAtIndex:index];
-//        }];
-//
-//    } else
-//        return;
-//
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Thông báo" message:message preferredStyle:UIAlertControllerStyleActionSheet];
 
     if (firstAction)

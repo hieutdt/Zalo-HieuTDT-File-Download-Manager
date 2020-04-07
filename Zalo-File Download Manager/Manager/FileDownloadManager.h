@@ -25,7 +25,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)pauseDownloadFileWithUrl:(NSString *)url
                         priority:(TaskPriority)priority
-                sameUrlFilesLeft:(unsigned long)leftCount
+               completionHandler:(void (^)(NSString *url, NSError *error))completionHandler;
+
+- (void)resumeDownloadFileWithUrl:(NSString *)url
+                         priority:(TaskPriority)priority
+                completionHandler:(void (^)(NSString *url, NSError *error))completionHandler;
+
+- (void)cancelDownloadFileWithUrl:(NSString *)url
+                         priority:(TaskPriority)priority
+                completionHandler:(void (^)(NSString *url))completionHandler;
+
+- (void)retryDownloadFileWithUrl:(NSString *)url
+                        priority:(TaskPriority)priority
                completionHandler:(void (^)(NSString *url, NSError *error))completionHandler;
 
 @end

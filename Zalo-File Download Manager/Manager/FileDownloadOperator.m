@@ -56,7 +56,9 @@
     return self;
 }
 
-- (void)updateTaskToStopDownloadWithPriority:(TaskPriority)priority
+#pragma mark - UpdateTaskBlock
+
+- (void)updateTaskToPauseDownloadWithPriority:(TaskPriority)priority
                            completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
                                callBackQueue:(dispatch_queue_t)callBackQueue {
     __weak FileDownloadOperator *weakSelf = self;
@@ -65,18 +67,82 @@
         if (weakSelf.downloadTask) {
             [weakSelf.downloadTask cancelByProducingResumeData:^(NSData *resumeData) {
                 if (resumeData) {
-                    [[DownloadDataCache instance] setData:resumeData forKey:weakSelf.item.identifier];
+                    [[DownloadDataCache instance] setData:resumeData forKey:weakSelf.item.url];
                     completionHandler(weakSelf.item.url, nil);
                 } else {
                     NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
                                                                 code:ERROR_GET_RESUME_DATA_FAILED
                                                             userInfo:@{@"Tạm dừng download thất bại!": NSLocalizedDescriptionKey}];
-                    completionHandler(weakSelf.item.url, error);
+                    dispatch_async(callBackQueue, ^{
+                        completionHandler(weakSelf.item.url, error);
+                    });
                 }
             }];
         }
     };
 }
+
+- (void)updateTaskToResumeDownloadWithPriority:(TaskPriority)priority
+                             completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
+                                 callBackQueue:(dispatch_queue_t)callBackQueue {
+    __weak FileDownloadOperator *weakSelf = self;
+    NSData *resumeData = [[DownloadDataCache instance] dataForKey:self.item.url];
+    
+    self.downloadTask = [self downloadTaskFromResumeData:resumeData timeOutIntervalForRequest:30];
+    self.priority = priority;
+    self.taskBlock = ^{
+        if (weakSelf.downloadTask) {
+            [weakSelf.downloadTask resume];
+            [[DownloadDataCache instance] removeDataByKey:weakSelf.item.url];
+            
+            dispatch_async(callBackQueue, ^{
+                completionHandler(weakSelf.item.url, nil);
+            });
+        } else {
+            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
+                                                        code:ERROR_GET_RESUME_DATA_FAILED
+                                                    userInfo:@{@"Không tìm thấy dữ liệu download": NSLocalizedDescriptionKey}];
+            dispatch_async(callBackQueue, ^{
+                completionHandler(weakSelf.item.url, error);
+            });
+        }
+    };
+}
+
+- (void)updateTaskToCancelDownloadWithPriority:(TaskPriority)priority
+                             completionHandler:(void (^)(NSString *url))completionHandler
+                                 callBackQueue:(dispatch_queue_t)callBackQueue {
+    __weak FileDownloadOperator *weakSelf = self;
+    self.priority = priority;
+    self.taskBlock = ^{
+        if (weakSelf.downloadTask) {
+            [weakSelf.downloadTask cancel];
+            
+            dispatch_async(callBackQueue, ^{
+                completionHandler(weakSelf.item.url);
+            });
+        }
+    };
+}
+
+- (void)updateTaskToReDownloadWithPriority:(TaskPriority)priority
+                         timeOutForRequest:(int)timeOut
+                         completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
+                             callBackQueue:(dispatch_queue_t)callBackQueue {
+    __weak FileDownloadOperator *weakSelf = self;
+    self.priority = priority;
+    self.taskBlock = ^{
+        weakSelf.downloadTask = [weakSelf downloadTaskFromUrl:weakSelf.item.url
+                                    timeOutIntervalForRequest:timeOut];
+        [weakSelf.downloadTask resume];
+        
+        dispatch_async(callBackQueue, ^{
+            completionHandler(weakSelf.item.url, nil);
+        });
+    };
+}
+
+#pragma mark - GenerateDownloadTask
 
 - (NSURLSessionDownloadTask *)downloadTaskFromUrl:(NSString *)url
                         timeOutIntervalForRequest:(int)timeOut {
@@ -90,12 +156,28 @@
     return downloadTask;
 }
 
+- (NSURLSessionDownloadTask *)downloadTaskFromResumeData:(NSData *)resumeData
+                               timeOutIntervalForRequest:(int)timeOut {
+    if (!resumeData)
+        return nil;
+    
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    configuration.timeoutIntervalForRequest = timeOut;
+
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
+    
+    NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithResumeData:resumeData];
+    return downloadTask;
+}
+
 #pragma mark - NSURLSessionDelegate
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
                                            didWriteData:(int64_t)bytesWritten
                                       totalBytesWritten:(int64_t)totalBytesWritten
                               totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+    NSLog(@"On progresss");
+    
     if (downloadTask == self.downloadTask && self.item && self.item.progressHandler) {
         dispatch_async(self.callBackQueue, ^{
             self.item.progressHandler(self.item.url, totalBytesWritten, totalBytesExpectedToWrite);
@@ -110,12 +192,11 @@
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
                            didCompleteWithError:(NSError *)error {
+    if (error)
+        NSLog(@"URL Session error: %@", error.userInfo);
+    
     if (task && self.item && self.item.completionHandler) {
         dispatch_async(self.callBackQueue, ^{
-            if (error) {
-                NSLog(@"URL Session error: %@", error.userInfo);
-            }
-            
             self.item.completionHandler(self.item.url, @"", error);
         });
     }

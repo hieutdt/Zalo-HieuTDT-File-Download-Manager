@@ -64,22 +64,99 @@
 
 - (void)pauseDownloadFileWithUrl:(NSString *)url
                         priority:(TaskPriority)priority
-                sameUrlFilesLeft:(unsigned long)leftCount
                completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
     if (!url || !completionHandler)
         return;
     
-    if (leftCount > 0) {
-        completionHandler(url, nil);
-        return;
+    @synchronized (self) {
+        FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
+        
+        if (!downloadOperator) {
+            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
+                                                        code:ERROR_GET_OPERATOR_FAILED
+                                                    userInfo:@{@"Can't find DownloadOperator": NSLocalizedDescriptionKey}];
+            completionHandler(url, error);
+        }
+        
+        [downloadOperator updateTaskToPauseDownloadWithPriority:priority completionHandler:^(NSString * _Nonnull url, NSError *error) {
+            completionHandler(url, error);
+        } callBackQueue:self.serialQueue];
+        
+        [self performTaskOperator:downloadOperator];
     }
+}
+
+- (void)resumeDownloadFileWithUrl:(NSString *)url
+                         priority:(TaskPriority)priority
+                completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
+    if (!url || !completionHandler)
+        return;
     
-    FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
-    [downloadOperator updateTaskToStopDownloadWithPriority:TaskPriorityHigh completionHandler:^(NSString * _Nonnull url, NSError *error) {
-        completionHandler(url, error);
-    } callBackQueue:self.serialQueue];
+    @synchronized (self) {
+        FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
+        
+        if (!downloadOperator) {
+            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
+                                                        code:ERROR_GET_OPERATOR_FAILED
+                                                    userInfo:@{@"Can't find DownloadOperator": NSLocalizedDescriptionKey}];
+            completionHandler(url, error);
+        }
+        
+        [downloadOperator updateTaskToResumeDownloadWithPriority:priority
+                                               completionHandler:^(NSString * _Nonnull url, NSError *error) {
+            completionHandler(url, error);
+        } callBackQueue:self.serialQueue];
+        
+        [self performTaskOperator:downloadOperator];
+    }
+}
+
+- (void)cancelDownloadFileWithUrl:(NSString *)url
+                         priority:(TaskPriority)priority
+                completionHandler:(void (^)(NSString *url))completionHandler {
+    if (!url || !completionHandler)
+        return;
     
-    [self performTaskOperator:downloadOperator];
+    @synchronized (self) {
+        FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
+        
+        if (!downloadOperator) {
+            completionHandler(url);
+            return;
+        }
+        
+        [downloadOperator updateTaskToCancelDownloadWithPriority:priority
+                                               completionHandler:^(NSString * _Nonnull url) {
+            completionHandler(url);
+        } callBackQueue:self.serialQueue];
+        
+        [self performTaskOperator:downloadOperator];
+    }
+}
+
+- (void)retryDownloadFileWithUrl:(NSString *)url
+                        priority:(TaskPriority)priority
+               completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
+    if (!url || !completionHandler)
+        return;
+    
+    @synchronized (self) {
+        FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
+        if (!downloadOperator) {
+            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
+                                                        code:ERROR_GET_OPERATOR_FAILED
+                                                    userInfo:@{@"Can't find DownloadOperator": NSLocalizedDescriptionKey}];
+            completionHandler(url, error);
+        }
+        
+        [downloadOperator updateTaskToReDownloadWithPriority:priority
+                                           timeOutForRequest:30
+                                           completionHandler:^(NSString * _Nonnull url, NSError *error) {
+            completionHandler(url, error);
+        } callBackQueue:self.serialQueue];
+        
+        [self performTaskOperator:downloadOperator];
+    }
 }
 
 @end
