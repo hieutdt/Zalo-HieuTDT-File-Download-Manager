@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FileDownloadOperator : TaskOperator
 
+@property (nonatomic, assign, getter=isRunning) BOOL running;
+
 #pragma mark - InitMethods
 
 - (instancetype)initWithFileDownloadItem:(FileDownloadItem *)item

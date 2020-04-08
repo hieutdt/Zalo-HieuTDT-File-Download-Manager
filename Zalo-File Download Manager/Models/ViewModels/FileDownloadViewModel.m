@@ -10,7 +10,6 @@
 #import "NimbusCore.h"
 #import "NimbusModels.h"
 #import "FileDownloadCell.h"
-#import "File.h"
 
 @interface FileDownloadViewModel () <NICellObject>
 

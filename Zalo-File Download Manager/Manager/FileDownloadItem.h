@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "File.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -16,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *identifier;
 @property (nonatomic, strong) NSString *url;
 @property (nonatomic, strong) void (^progressHandler)(NSString *url, long long bytesWritten, long long totalBytes);
-@property (nonatomic, strong) void (^completionHandler)(NSString *url, NSString *locationPath, NSError *error);
+@property (nonatomic, strong) void (^completionHandler)(NSString *url, NSString *locationPath, NSError  * _Nullable error);
 
 - (instancetype)initWithDownloadUrl:(NSString *)url
                     progressHandler:(void (^)(NSString *url, long long bytesWritten, long long totalBytes))progressHandler

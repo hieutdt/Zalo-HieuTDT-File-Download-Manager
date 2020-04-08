@@ -23,6 +23,7 @@
 - (instancetype)init {
     self = [super initWithTaskBlock:^{} priority:TaskPriorityNormal];
     if (self) {
+        _running = NO;
     }
     return self;
 }
@@ -51,6 +52,7 @@
         self.taskBlock = ^{
             if (weakSelf.downloadTask) {
                 [weakSelf.downloadTask resume];
+                weakSelf.running = YES;
             }
         };
     }
@@ -78,6 +80,7 @@
                         completionHandler(weakSelf.item.url, error);
                     });
                 }
+                weakSelf.running = NO;
             }];
         }
     };
@@ -95,6 +98,7 @@
         if (weakSelf.downloadTask) {
             [weakSelf.downloadTask resume];
             [[DownloadDataCache instance] removeDataByKey:weakSelf.item.url];
+            weakSelf.running = YES;
             
             dispatch_async(callBackQueue, ^{
                 completionHandler(weakSelf.item.url, nil);
@@ -118,6 +122,7 @@
     self.taskBlock = ^{
         if (weakSelf.downloadTask) {
             [weakSelf.downloadTask cancel];
+            weakSelf.running = NO;
             
             dispatch_async(callBackQueue, ^{
                 completionHandler(weakSelf.item.url);
@@ -136,6 +141,7 @@
         weakSelf.downloadTask = [weakSelf downloadTaskFromUrl:weakSelf.item.url
                                     timeOutIntervalForRequest:timeOut];
         [weakSelf.downloadTask resume];
+        weakSelf.running = YES;
         
         dispatch_async(callBackQueue, ^{
             completionHandler(weakSelf.item.url, nil);

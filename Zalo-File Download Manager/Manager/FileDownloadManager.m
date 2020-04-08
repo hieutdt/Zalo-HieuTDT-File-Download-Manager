@@ -43,7 +43,7 @@
     if (!url || !progressHandler || !completionHandler)
         return;
     
-    if ([self.fileOperatorDictionary valueForKey:url]) {
+    if ([self.fileOperatorDictionary valueForKey:url] && [self.fileOperatorDictionary valueForKey:url].isRunning) {
         return;
     }
     
@@ -56,7 +56,11 @@
                                                                                       timeOutForRequest:timeOut
                                                                                           callBackQueue:self.serialQueue];
         
-        [self.fileOperatorDictionary addEntriesFromDictionary:@{url : downloadOperator}];
+        if ([self.fileOperatorDictionary valueForKey:url]) {
+            [self.fileOperatorDictionary setObject:downloadOperator forKey:url];
+        } else {
+            [self.fileOperatorDictionary addEntriesFromDictionary:@{url : downloadOperator}];
+        }
         
         [self performTaskOperator:downloadOperator];
     }
