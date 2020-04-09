@@ -20,14 +20,13 @@
 
 @property (nonatomic, strong) UIBarButtonItem *downloadBarButton;
 @property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) FileDownloadTableViewModel *tableViewModel;
 
 @property (nonatomic, strong) NSMutableArray<FileDownloadViewModel *> *fileViewModels;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableArray *> *urlHashMap;
 
 @property (nonatomic, strong) void (^progressHandler)(NSString *url, long long bytesWritten, long long totalBytes);
 @property (nonatomic, strong) void (^completionHandler)(NSString *url, NSString *locationPath, NSError *error);
-
-@property (nonatomic, strong) FileDownloadTableViewModel *tableViewModel;
 
 @property (nonatomic) BOOL isScrolling;
 
@@ -166,7 +165,7 @@
     float progress = 0;
     if (totalBytes > 0) {
         progress = bytesWritten * 1.0 / totalBytes;
-        progress = roundf(progress * 40) / 40;
+        progress = roundf(progress * 50) / 50;
     } else {
         progress = 0;
     }

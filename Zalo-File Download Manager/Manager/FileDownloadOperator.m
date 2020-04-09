@@ -14,6 +14,7 @@
 
 @property (nonatomic, strong) FileDownloadItem *item;
 @property (nonatomic, strong) NSURLSessionDownloadTask *downloadTask;
+@property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) dispatch_queue_t callBackQueue;
 
 @end
@@ -64,6 +65,9 @@
 - (void)updateTaskToPauseDownloadWithPriority:(TaskPriority)priority
                            completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
                                callBackQueue:(dispatch_queue_t)callBackQueue {
+    if (!completionHandler)
+        return;
+    
     __weak FileDownloadOperator *weakSelf = self;
     self.priority = priority;
     self.taskBlock = ^{
@@ -89,6 +93,9 @@
 - (void)updateTaskToResumeDownloadWithPriority:(TaskPriority)priority
                              completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
                                  callBackQueue:(dispatch_queue_t)callBackQueue {
+    if (!completionHandler)
+        return;
+    
     __weak FileDownloadOperator *weakSelf = self;
     NSData *resumeData = [[DownloadDataCache instance] dataForKey:self.item.url];
     
@@ -117,6 +124,9 @@
 - (void)updateTaskToCancelDownloadWithPriority:(TaskPriority)priority
                              completionHandler:(void (^)(NSString *url))completionHandler
                                  callBackQueue:(dispatch_queue_t)callBackQueue {
+    if (!completionHandler)
+        return;
+    
     __weak FileDownloadOperator *weakSelf = self;
     self.priority = priority;
     self.taskBlock = ^{
@@ -135,6 +145,9 @@
                          timeOutForRequest:(int)timeOut
                          completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
                              callBackQueue:(dispatch_queue_t)callBackQueue {
+    if (!completionHandler)
+        return;
+    
     __weak FileDownloadOperator *weakSelf = self;
     self.priority = priority;
     self.taskBlock = ^{
@@ -153,15 +166,18 @@
 
 - (NSURLSessionDownloadTask *)downloadTaskFromUrl:(NSString *)url
                         timeOutIntervalForRequest:(int)timeOut {
+    if (!url)
+        return nil;
+    
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@", self.item.url]];
     configuration.timeoutIntervalForRequest = timeOut;
     configuration.discretionary = YES;
     configuration.sessionSendsLaunchEvents = YES;
     
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
+    _session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
     
-    NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithRequest:request];
+    NSURLSessionDownloadTask *downloadTask = [_session downloadTaskWithRequest:request];
     return downloadTask;
 }
 
@@ -170,14 +186,14 @@
     if (!resumeData)
         return nil;
     
-    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"FileDownloadOperator"];
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@", self.item.url]];
     configuration.timeoutIntervalForRequest = timeOut;
     configuration.discretionary = YES;
     configuration.sessionSendsLaunchEvents = YES;
 
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
+    _session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
     
-    NSURLSessionDownloadTask *downloadTask = [session downloadTaskWithResumeData:resumeData];
+    NSURLSessionDownloadTask *downloadTask = [_session downloadTaskWithResumeData:resumeData];
     return downloadTask;
 }
 
@@ -203,10 +219,6 @@
         NSURL *savedURL = [documentsURL URLByAppendingPathComponent:location.lastPathComponent];
         
         [fileManager moveItemAtURL:location toURL:savedURL error:nil];
-        
-        dispatch_async(self.callBackQueue, ^{
-            self.item.completionHandler(self.item.url, savedURL.absoluteString, nil);
-        });
     } @catch (NSError *error) {
         NSLog(@"Error: %@", error.userInfo);
     }

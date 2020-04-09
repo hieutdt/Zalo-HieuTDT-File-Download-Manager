@@ -45,6 +45,9 @@
 #pragma mark - InternalMethods
 
 - (void)addTaskOperatorToQueue:(TaskOperator *)taskOperator {
+    if (!taskOperator)
+        return;
+    
     @synchronized (self) {
         if (taskOperator.priority == TaskPriorityHigh) {
             [self.highPriorityTasks addObject:taskOperator];
@@ -58,21 +61,21 @@
 
 - (TaskOperator *)nextTaskOperator {
     @synchronized (self) {
-        TaskOperator *task = [self.highPriorityTasks lastObject];
+        TaskOperator *task = [self.highPriorityTasks firstObject];
         if (task) {
-            [self.highPriorityTasks removeLastObject];
+            [self.highPriorityTasks removeObjectAtIndex:0];
             return task;
         }
         
-        task = [self.normalPriorityTasks lastObject];
+        task = [self.normalPriorityTasks firstObject];
         if (task) {
-            [self.normalPriorityTasks removeLastObject];
+            [self.normalPriorityTasks removeObjectAtIndex:0];
             return task;
         }
         
-        task = [self.lowPriorityTasks lastObject];
+        task = [self.lowPriorityTasks firstObject];
         if (task) {
-            [self.lowPriorityTasks removeLastObject];
+            [self.lowPriorityTasks removeObjectAtIndex:0];
             return task;
         }
         
