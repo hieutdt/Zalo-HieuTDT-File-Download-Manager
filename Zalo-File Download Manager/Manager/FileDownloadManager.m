@@ -46,8 +46,8 @@
     if ([self.fileOperatorDictionary valueForKey:url] && [self.fileOperatorDictionary valueForKey:url].isRunning) {
         return;
     }
-    
-    @synchronized (self) {
+
+    dispatch_async(self.serialQueue, ^{
         FileDownloadItem *downloadItem = [[FileDownloadItem alloc] initWithDownloadUrl:url
                                                                        progressHandler:progressHandler
                                                                      completionHandler:completionHandler];
@@ -61,106 +61,117 @@
         } else {
             [self.fileOperatorDictionary addEntriesFromDictionary:@{url : downloadOperator}];
         }
-        
+            
         [self performTaskOperator:downloadOperator];
-    }
+    });
 }
 
 - (void)pauseDownloadFileWithUrl:(NSString *)url
-                        priority:(TaskPriority)priority
                completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
-    if (!url || !completionHandler)
+    if (!url)
         return;
     
-    @synchronized (self) {
+    dispatch_async(self.serialQueue, ^{
         FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
         
         if (!downloadOperator) {
             NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
                                                         code:ERROR_GET_OPERATOR_FAILED
                                                     userInfo:@{@"Can't find DownloadOperator": NSLocalizedDescriptionKey}];
-            completionHandler(url, error);
+            
+            if (completionHandler) {
+                completionHandler(url, error);
+            }
         }
         
-        [downloadOperator updateTaskToPauseDownloadWithPriority:priority completionHandler:^(NSString * _Nonnull url, NSError *error) {
+        [downloadOperator updateTaskToPauseDownloadWithPriority:TaskPriorityHigh completionHandler:^(NSString * _Nonnull url, NSError *error) {
             completionHandler(url, error);
         } callBackQueue:self.serialQueue];
         
         [self performTaskOperator:downloadOperator];
-    }
+    });
 }
 
 - (void)resumeDownloadFileWithUrl:(NSString *)url
-                         priority:(TaskPriority)priority
                 completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
-    if (!url || !completionHandler)
+    if (!url)
         return;
     
-    @synchronized (self) {
+    dispatch_async(self.serialQueue, ^{
         FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
         
         if (!downloadOperator) {
             NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
                                                         code:ERROR_GET_OPERATOR_FAILED
                                                     userInfo:@{@"Can't find DownloadOperator": NSLocalizedDescriptionKey}];
-            completionHandler(url, error);
+            if (completionHandler) {
+                completionHandler(url, error);
+            }
         }
         
-        [downloadOperator updateTaskToResumeDownloadWithPriority:priority
+        [downloadOperator updateTaskToResumeDownloadWithPriority:TaskPriorityHigh
                                                completionHandler:^(NSString * _Nonnull url, NSError *error) {
-            completionHandler(url, error);
+            if (completionHandler) {
+                completionHandler(url, error);
+            }
         } callBackQueue:self.serialQueue];
         
         [self performTaskOperator:downloadOperator];
-    }
+    });
 }
 
 - (void)cancelDownloadFileWithUrl:(NSString *)url
-                         priority:(TaskPriority)priority
                 completionHandler:(void (^)(NSString *url))completionHandler {
-    if (!url || !completionHandler)
+    if (!url)
         return;
     
-    @synchronized (self) {
+    dispatch_async(self.serialQueue, ^{
         FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
         
         if (!downloadOperator) {
-            completionHandler(url);
+            if (completionHandler) {
+                completionHandler(url);
+            }
             return;
         }
         
-        [downloadOperator updateTaskToCancelDownloadWithPriority:priority
+        [downloadOperator updateTaskToCancelDownloadWithPriority:TaskPriorityHigh
                                                completionHandler:^(NSString * _Nonnull url) {
-            completionHandler(url);
+            if (completionHandler) {
+                completionHandler(url);
+            }
         } callBackQueue:self.serialQueue];
         
         [self performTaskOperator:downloadOperator];
-    }
+    });
 }
 
 - (void)retryDownloadFileWithUrl:(NSString *)url
-                        priority:(TaskPriority)priority
                completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
-    if (!url || !completionHandler)
+    if (!url)
         return;
     
-    @synchronized (self) {
+    dispatch_async(self.serialQueue, ^{
         FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
         if (!downloadOperator) {
             NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
                                                         code:ERROR_GET_OPERATOR_FAILED
                                                     userInfo:@{@"Can't find DownloadOperator": NSLocalizedDescriptionKey}];
-            completionHandler(url, error);
+            if (completionHandler) {
+                completionHandler(url, error);
+            }
         }
         
-        [downloadOperator updateTaskToReDownloadWithPriority:priority
+        [downloadOperator updateTaskToReDownloadWithPriority:TaskPriorityHigh
                                            timeOutForRequest:30
                                            completionHandler:^(NSString * _Nonnull url, NSError *error) {
-            completionHandler(url, error);
+            if (completionHandler) {
+                completionHandler(url, error);
+            }
         } callBackQueue:self.serialQueue];
         
         [self performTaskOperator:downloadOperator];
-    }
+    });
 }
 
 @end

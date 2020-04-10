@@ -11,14 +11,25 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class TaskOperator;
+
+@protocol TaskOperatorDelegate <NSObject>
+
+- (void)taskOperatorDidFinish:(TaskOperator *)taskOperator;
+
+@end
+
 @interface TaskOperator : NSObject
 
+@property (nonatomic, strong) id<TaskOperatorDelegate> delegate;
 @property (nonatomic, strong) dispatch_block_t taskBlock;
 @property (nonatomic, assign) TaskPriority priority;
 
 - (void)execute;
 
 - (instancetype)initWithTaskBlock:(dispatch_block_t)block priority:(TaskPriority)priority;
+
+- (void)finish;
 
 @end
 

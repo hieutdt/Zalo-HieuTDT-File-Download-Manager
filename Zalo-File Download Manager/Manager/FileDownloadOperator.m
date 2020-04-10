@@ -9,6 +9,7 @@
 #import "FileDownloadOperator.h"
 #import "DownloadDataCache.h"
 #import "AppDelegate.h"
+#import "URLDownloadCache.h"
 
 @interface FileDownloadOperator () <NSURLSessionDownloadDelegate, NSURLSessionDelegate>
 
@@ -219,6 +220,10 @@
         NSURL *savedURL = [documentsURL URLByAppendingPathComponent:location.lastPathComponent];
         
         [fileManager moveItemAtURL:location toURL:savedURL error:nil];
+        
+        // Cache this location path
+        [[URLDownloadCache instance] setLocationPath:[savedURL absoluteString] forUrl:self.item.url];
+        
     } @catch (NSError *error) {
         NSLog(@"Error: %@", error.userInfo);
     }
@@ -234,6 +239,8 @@
             self.item.completionHandler(self.item.url, @"", error);
         });
     }
+    
+    [self finish];
 }
 
 #pragma mark - NSURLSessionDelegate

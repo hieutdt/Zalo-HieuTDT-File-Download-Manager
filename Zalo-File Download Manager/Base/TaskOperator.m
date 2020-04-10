@@ -29,4 +29,10 @@
     }
 }
 
+- (void)finish {
+    if (self.delegate && [self.delegate conformsToProtocol:@protocol(TaskOperatorDelegate)]) {
+        [self.delegate taskOperatorDidFinish:self];
+    }
+}
+
 @end

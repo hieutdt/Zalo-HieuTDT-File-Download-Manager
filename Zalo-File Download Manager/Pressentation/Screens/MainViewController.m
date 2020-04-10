@@ -209,7 +209,6 @@
         }
         
         [[FileDownloadManager instance] pauseDownloadFileWithUrl:self.fileViewModels[index].url
-                                                        priority:TaskPriorityHigh
                                                completionHandler:^(NSString * _Nonnull url, NSError *error) {
             if (!url)
                 return;
@@ -244,7 +243,6 @@
         }
         
         [[FileDownloadManager instance] resumeDownloadFileWithUrl:self.fileViewModels[index].url
-                                                         priority:TaskPriorityNormal
                                                 completionHandler:^(NSString * _Nonnull url, NSError *error) {
             if (!url)
                 return;
@@ -276,7 +274,6 @@
         }
         
         [[FileDownloadManager instance] cancelDownloadFileWithUrl:self.fileViewModels[index].url
-                                                         priority:TaskPriorityHigh
                                                 completionHandler:^(NSString * _Nonnull url) {
             [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:0];
         }];
@@ -299,7 +296,6 @@
         }
         
         [[FileDownloadManager instance] retryDownloadFileWithUrl:self.fileViewModels[index].url
-                                                        priority:TaskPriorityNormal
                                                completionHandler:^(NSString * _Nonnull url, NSError *error) {
             if (!error) {
                 [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:0];

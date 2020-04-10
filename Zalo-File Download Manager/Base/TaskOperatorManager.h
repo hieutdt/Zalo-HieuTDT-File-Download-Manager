@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "TaskOperator.h"
 
+static const int maxCurrentTask = 10;
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface TaskOperatorManager : NSObject

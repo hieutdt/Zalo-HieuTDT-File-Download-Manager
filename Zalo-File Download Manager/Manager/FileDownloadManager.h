@@ -24,19 +24,15 @@ NS_ASSUME_NONNULL_BEGIN
                  completionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler;
 
 - (void)pauseDownloadFileWithUrl:(NSString *)url
-                        priority:(TaskPriority)priority
                completionHandler:(void (^)(NSString *url, NSError *error))completionHandler;
 
 - (void)resumeDownloadFileWithUrl:(NSString *)url
-                         priority:(TaskPriority)priority
                 completionHandler:(void (^)(NSString *url, NSError *error))completionHandler;
 
 - (void)cancelDownloadFileWithUrl:(NSString *)url
-                         priority:(TaskPriority)priority
                 completionHandler:(void (^)(NSString *url))completionHandler;
 
 - (void)retryDownloadFileWithUrl:(NSString *)url
-                        priority:(TaskPriority)priority
                completionHandler:(void (^)(NSString *url, NSError *error))completionHandler;
 
 @end

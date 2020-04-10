@@ -51,6 +51,8 @@
 		043E165D24323BAD003CDE74 /* FileDownloadViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 043E165B24323BAD003CDE74 /* FileDownloadViewModel.m */; };
 		045A31282438C78000F9E887 /* TaskOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 045A31272438C78000F9E887 /* TaskOperator.m */; };
 		045A31292438C78000F9E887 /* TaskOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 045A31272438C78000F9E887 /* TaskOperator.m */; };
+		04A76AAC24406CE5009A253C /* URLDownloadCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A76AAB24406CE5009A253C /* URLDownloadCache.m */; };
+		04A76AAD24406CE5009A253C /* URLDownloadCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A76AAB24406CE5009A253C /* URLDownloadCache.m */; };
 		04B501A1243A14FE002AF22F /* FileDownloadItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A0243A14FE002AF22F /* FileDownloadItem.m */; };
 		04B501A2243A14FE002AF22F /* FileDownloadItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A0243A14FE002AF22F /* FileDownloadItem.m */; };
 		04B501A5243A1840002AF22F /* TaskOperatorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A4243A1840002AF22F /* TaskOperatorManager.m */; };
@@ -165,6 +167,8 @@
 		043E165E24323C2C003CDE74 /* AppConsts.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppConsts.h; sourceTree = "<group>"; };
 		045A31262438C78000F9E887 /* TaskOperator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TaskOperator.h; sourceTree = "<group>"; };
 		045A31272438C78000F9E887 /* TaskOperator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TaskOperator.m; sourceTree = "<group>"; };
+		04A76AAA24406CE5009A253C /* URLDownloadCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = URLDownloadCache.h; sourceTree = "<group>"; };
+		04A76AAB24406CE5009A253C /* URLDownloadCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = URLDownloadCache.m; sourceTree = "<group>"; };
 		04B5019F243A14FE002AF22F /* FileDownloadItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadItem.h; sourceTree = "<group>"; };
 		04B501A0243A14FE002AF22F /* FileDownloadItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileDownloadItem.m; sourceTree = "<group>"; };
 		04B501A3243A1840002AF22F /* TaskOperatorManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TaskOperatorManager.h; sourceTree = "<group>"; };
@@ -278,16 +282,8 @@
 			isa = PBXGroup;
 			children = (
 				043E165924323B92003CDE74 /* ViewModels */,
-				0417EF58242DDF3300587BE1 /* Entities */,
 			);
 			path = Models;
-			sourceTree = "<group>";
-		};
-		0417EF58242DDF3300587BE1 /* Entities */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Entities;
 			sourceTree = "<group>";
 		};
 		043E15F624323B63003CDE74 /* NimbusKit */ = {
@@ -436,6 +432,8 @@
 			children = (
 				04F79D7F24336F7E00517235 /* DownloadDataCache.h */,
 				04F79D8024336F7E00517235 /* DownloadDataCache.m */,
+				04A76AAA24406CE5009A253C /* URLDownloadCache.h */,
+				04A76AAB24406CE5009A253C /* URLDownloadCache.m */,
 			);
 			path = Caching;
 			sourceTree = "<group>";
@@ -567,6 +565,7 @@
 				043E165524323B63003CDE74 /* NIMutableTableViewModel.m in Sources */,
 				043E164424323B63003CDE74 /* NIRuntimeClassModifications.m in Sources */,
 				043E164324323B63003CDE74 /* NINonRetainingCollections.m in Sources */,
+				04A76AAC24406CE5009A253C /* URLDownloadCache.m in Sources */,
 				043E164224323B63003CDE74 /* UIResponder+NimbusCore.m in Sources */,
 				040F461E2432E76E00321B75 /* FileDownloadTableViewModel.m in Sources */,
 				043E164F24323B63003CDE74 /* NISDKAvailability.m in Sources */,
@@ -589,6 +588,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04A76AAD24406CE5009A253C /* URLDownloadCache.m in Sources */,
 				043E165D24323BAD003CDE74 /* FileDownloadViewModel.m in Sources */,
 				04F79D8224336F7E00517235 /* DownloadDataCache.m in Sources */,
 				04E165DB2439A330006FE6F1 /* FileDownloadOperator.m in Sources */,
