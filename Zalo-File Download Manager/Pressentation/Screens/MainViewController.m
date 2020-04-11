@@ -16,6 +16,7 @@
 
 #import "FileDownloadManager.h"
 #import "Connectivity.h"
+#import "URLDownloadCache.h"
 
 @interface MainViewController () <UITableViewDelegate, FileDownloadTableViewModelDelegate>
 
@@ -140,12 +141,17 @@
     
     for (int i = 0; i < self.fileViewModels.count; i++) {
         FileDownloadViewModel *viewModel = self.fileViewModels[i];
-        [[FileDownloadManager instance] performDownloadFileWithUrl:viewModel.url
-                                                          priority:TaskPriorityNormal
-                                         timeOutIntervalForRequest:timeOutForRequest
-                                        timeOutIntervalForResource:timeOutForResource
-                                                   progressHandler:self.progressHandler
-                                                 completionHandler:self.completionHandler];
+        
+        if ([[URLDownloadCache instance] pathForUrl:viewModel.url]) {
+            viewModel.state = FileDownloadFinish;
+        } else {
+            [[FileDownloadManager instance] performDownloadFileWithUrl:viewModel.url
+                                                              priority:TaskPriorityNormal
+                                             timeOutIntervalForRequest:timeOutForRequest
+                                            timeOutIntervalForResource:timeOutForResource
+                                                       progressHandler:self.progressHandler
+                                                     completionHandler:self.completionHandler];
+        }
     }
     
     // Hide that download button after clicked
