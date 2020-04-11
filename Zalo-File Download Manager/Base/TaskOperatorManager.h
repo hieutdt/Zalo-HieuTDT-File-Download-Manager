@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "TaskOperator.h"
 
-static const int maxCurrentTask = 10;
+static const int MAX_CURRENT_TASK = 10;
 
 NS_ASSUME_NONNULL_BEGIN
 

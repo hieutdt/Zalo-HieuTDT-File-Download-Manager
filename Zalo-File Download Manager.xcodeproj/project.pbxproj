@@ -51,6 +51,9 @@
 		043E165D24323BAD003CDE74 /* FileDownloadViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 043E165B24323BAD003CDE74 /* FileDownloadViewModel.m */; };
 		045A31282438C78000F9E887 /* TaskOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 045A31272438C78000F9E887 /* TaskOperator.m */; };
 		045A31292438C78000F9E887 /* TaskOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 045A31272438C78000F9E887 /* TaskOperator.m */; };
+		0496D5E62440BDCD007826F8 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 0496D5E42440BDCC007826F8 /* Reachability.m */; };
+		0496D5E72440BDCD007826F8 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 0496D5E42440BDCC007826F8 /* Reachability.m */; };
+		0496D5E92440BDE8007826F8 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0496D5E82440BDE8007826F8 /* SystemConfiguration.framework */; };
 		04A76AAC24406CE5009A253C /* URLDownloadCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A76AAB24406CE5009A253C /* URLDownloadCache.m */; };
 		04A76AAD24406CE5009A253C /* URLDownloadCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A76AAB24406CE5009A253C /* URLDownloadCache.m */; };
 		04B501A1243A14FE002AF22F /* FileDownloadItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A0243A14FE002AF22F /* FileDownloadItem.m */; };
@@ -59,12 +62,16 @@
 		04B501A6243A1840002AF22F /* TaskOperatorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A4243A1840002AF22F /* TaskOperatorManager.m */; };
 		04B501A9243A239E002AF22F /* FileDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A8243A239E002AF22F /* FileDownloadManager.m */; };
 		04B501AA243A239E002AF22F /* FileDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A8243A239E002AF22F /* FileDownloadManager.m */; };
+		04DE9CB3244164330058C31E /* Connectivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DE9CB2244164330058C31E /* Connectivity.m */; };
+		04DE9CB4244164330058C31E /* Connectivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DE9CB2244164330058C31E /* Connectivity.m */; };
 		04E165DA2439A330006FE6F1 /* FileDownloadOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E165D92439A330006FE6F1 /* FileDownloadOperator.m */; };
 		04E165DB2439A330006FE6F1 /* FileDownloadOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E165D92439A330006FE6F1 /* FileDownloadOperator.m */; };
 		04E84FB924323F5C004557A3 /* FileDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E84FB824323F5C004557A3 /* FileDownloadCell.m */; };
 		04E84FBA24323F5C004557A3 /* FileDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E84FB824323F5C004557A3 /* FileDownloadCell.m */; };
 		04F79D8124336F7E00517235 /* DownloadDataCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F79D8024336F7E00517235 /* DownloadDataCache.m */; };
 		04F79D8224336F7E00517235 /* DownloadDataCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 04F79D8024336F7E00517235 /* DownloadDataCache.m */; };
+		44B899FB87EA500797CA16BB /* Pods_Zalo_File_Download_ManagerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F35DBF4AA3C222E2706A20E3 /* Pods_Zalo_File_Download_ManagerTests.framework */; };
+		B8DBF5ED0725D46B351EB8C2 /* Pods_Zalo_File_Download_Manager.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DEFDC5B1E8B32B8667CB701 /* Pods_Zalo_File_Download_Manager.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -167,6 +174,10 @@
 		043E165E24323C2C003CDE74 /* AppConsts.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppConsts.h; sourceTree = "<group>"; };
 		045A31262438C78000F9E887 /* TaskOperator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TaskOperator.h; sourceTree = "<group>"; };
 		045A31272438C78000F9E887 /* TaskOperator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TaskOperator.m; sourceTree = "<group>"; };
+		0496D5E42440BDCC007826F8 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		0496D5E52440BDCC007826F8 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		0496D5E82440BDE8007826F8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		0496D5EA2440BE8A007826F8 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		04A76AAA24406CE5009A253C /* URLDownloadCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = URLDownloadCache.h; sourceTree = "<group>"; };
 		04A76AAB24406CE5009A253C /* URLDownloadCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = URLDownloadCache.m; sourceTree = "<group>"; };
 		04B5019F243A14FE002AF22F /* FileDownloadItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadItem.h; sourceTree = "<group>"; };
@@ -175,12 +186,20 @@
 		04B501A4243A1840002AF22F /* TaskOperatorManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TaskOperatorManager.m; sourceTree = "<group>"; };
 		04B501A7243A239E002AF22F /* FileDownloadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadManager.h; sourceTree = "<group>"; };
 		04B501A8243A239E002AF22F /* FileDownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileDownloadManager.m; sourceTree = "<group>"; };
+		04DE9CB1244164330058C31E /* Connectivity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Connectivity.h; sourceTree = "<group>"; };
+		04DE9CB2244164330058C31E /* Connectivity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Connectivity.m; sourceTree = "<group>"; };
 		04E165D82439A330006FE6F1 /* FileDownloadOperator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadOperator.h; sourceTree = "<group>"; };
 		04E165D92439A330006FE6F1 /* FileDownloadOperator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileDownloadOperator.m; sourceTree = "<group>"; };
 		04E84FB724323F5C004557A3 /* FileDownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadCell.h; sourceTree = "<group>"; };
 		04E84FB824323F5C004557A3 /* FileDownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileDownloadCell.m; sourceTree = "<group>"; };
 		04F79D7F24336F7E00517235 /* DownloadDataCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadDataCache.h; sourceTree = "<group>"; };
 		04F79D8024336F7E00517235 /* DownloadDataCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadDataCache.m; sourceTree = "<group>"; };
+		2CA1F0438A4C52799455766E /* Pods-Zalo-File Download ManagerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zalo-File Download ManagerTests.release.xcconfig"; path = "Target Support Files/Pods-Zalo-File Download ManagerTests/Pods-Zalo-File Download ManagerTests.release.xcconfig"; sourceTree = "<group>"; };
+		4E31DC127B185A753E7755FE /* Pods-Zalo-File Download Manager.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zalo-File Download Manager.debug.xcconfig"; path = "Target Support Files/Pods-Zalo-File Download Manager/Pods-Zalo-File Download Manager.debug.xcconfig"; sourceTree = "<group>"; };
+		8DEFDC5B1E8B32B8667CB701 /* Pods_Zalo_File_Download_Manager.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Zalo_File_Download_Manager.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2DB27F19CFC90EFFDE85930 /* Pods-Zalo-File Download ManagerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zalo-File Download ManagerTests.debug.xcconfig"; path = "Target Support Files/Pods-Zalo-File Download ManagerTests/Pods-Zalo-File Download ManagerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		E51F494FA23C46A42E6363EB /* Pods-Zalo-File Download Manager.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zalo-File Download Manager.release.xcconfig"; path = "Target Support Files/Pods-Zalo-File Download Manager/Pods-Zalo-File Download Manager.release.xcconfig"; sourceTree = "<group>"; };
+		F35DBF4AA3C222E2706A20E3 /* Pods_Zalo_File_Download_ManagerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Zalo_File_Download_ManagerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -188,6 +207,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0496D5E92440BDE8007826F8 /* SystemConfiguration.framework in Frameworks */,
+				B8DBF5ED0725D46B351EB8C2 /* Pods_Zalo_File_Download_Manager.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,6 +216,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44B899FB87EA500797CA16BB /* Pods_Zalo_File_Download_ManagerTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -208,6 +230,8 @@
 				0417EF23242DD0CA00587BE1 /* Zalo-File Download Manager */,
 				0417EF42242DD0CA00587BE1 /* Zalo-File Download ManagerTests */,
 				0417EF22242DD0CA00587BE1 /* Products */,
+				DDEE535A117B4F61D846ABF2 /* Pods */,
+				4A30178FC21F977D654F90BD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -390,12 +414,8 @@
 		045A31242438C75C00F9E887 /* Manager */ = {
 			isa = PBXGroup;
 			children = (
-				04B501A7243A239E002AF22F /* FileDownloadManager.h */,
-				04B501A8243A239E002AF22F /* FileDownloadManager.m */,
-				04E165D82439A330006FE6F1 /* FileDownloadOperator.h */,
-				04E165D92439A330006FE6F1 /* FileDownloadOperator.m */,
-				04B5019F243A14FE002AF22F /* FileDownloadItem.h */,
-				04B501A0243A14FE002AF22F /* FileDownloadItem.m */,
+				04BF2F532440A34E00A10971 /* Connectivity */,
+				04BF2F522440A33300A10971 /* FileDownload */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -414,9 +434,41 @@
 		047806B1242F43D30054C9E1 /* Framework */ = {
 			isa = PBXGroup;
 			children = (
+				0496D5E32440BD90007826F8 /* Reachability */,
 				043E15F624323B63003CDE74 /* NimbusKit */,
 			);
 			path = Framework;
+			sourceTree = "<group>";
+		};
+		0496D5E32440BD90007826F8 /* Reachability */ = {
+			isa = PBXGroup;
+			children = (
+				0496D5E52440BDCC007826F8 /* Reachability.h */,
+				0496D5E42440BDCC007826F8 /* Reachability.m */,
+			);
+			path = Reachability;
+			sourceTree = "<group>";
+		};
+		04BF2F522440A33300A10971 /* FileDownload */ = {
+			isa = PBXGroup;
+			children = (
+				04B501A7243A239E002AF22F /* FileDownloadManager.h */,
+				04B501A8243A239E002AF22F /* FileDownloadManager.m */,
+				04E165D82439A330006FE6F1 /* FileDownloadOperator.h */,
+				04E165D92439A330006FE6F1 /* FileDownloadOperator.m */,
+				04B5019F243A14FE002AF22F /* FileDownloadItem.h */,
+				04B501A0243A14FE002AF22F /* FileDownloadItem.m */,
+			);
+			path = FileDownload;
+			sourceTree = "<group>";
+		};
+		04BF2F532440A34E00A10971 /* Connectivity */ = {
+			isa = PBXGroup;
+			children = (
+				04DE9CB1244164330058C31E /* Connectivity.h */,
+				04DE9CB2244164330058C31E /* Connectivity.m */,
+			);
+			path = Connectivity;
 			sourceTree = "<group>";
 		};
 		04F79D7D24336F6300517235 /* Helper */ = {
@@ -438,6 +490,28 @@
 			path = Caching;
 			sourceTree = "<group>";
 		};
+		4A30178FC21F977D654F90BD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0496D5EA2440BE8A007826F8 /* CoreTelephony.framework */,
+				0496D5E82440BDE8007826F8 /* SystemConfiguration.framework */,
+				8DEFDC5B1E8B32B8667CB701 /* Pods_Zalo_File_Download_Manager.framework */,
+				F35DBF4AA3C222E2706A20E3 /* Pods_Zalo_File_Download_ManagerTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DDEE535A117B4F61D846ABF2 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				4E31DC127B185A753E7755FE /* Pods-Zalo-File Download Manager.debug.xcconfig */,
+				E51F494FA23C46A42E6363EB /* Pods-Zalo-File Download Manager.release.xcconfig */,
+				E2DB27F19CFC90EFFDE85930 /* Pods-Zalo-File Download ManagerTests.debug.xcconfig */,
+				2CA1F0438A4C52799455766E /* Pods-Zalo-File Download ManagerTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -445,6 +519,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0417EF48242DD0CA00587BE1 /* Build configuration list for PBXNativeTarget "Zalo-File Download Manager" */;
 			buildPhases = (
+				956CBE6BEFB3B137878D6806 /* [CP] Check Pods Manifest.lock */,
 				0417EF1D242DD0CA00587BE1 /* Sources */,
 				0417EF1E242DD0CA00587BE1 /* Frameworks */,
 				0417EF1F242DD0CA00587BE1 /* Resources */,
@@ -462,6 +537,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0417EF4B242DD0CA00587BE1 /* Build configuration list for PBXNativeTarget "Zalo-File Download ManagerTests" */;
 			buildPhases = (
+				8031589B963DCAA5F24AF881 /* [CP] Check Pods Manifest.lock */,
 				0417EF3B242DD0CA00587BE1 /* Sources */,
 				0417EF3C242DD0CA00587BE1 /* Frameworks */,
 				0417EF3D242DD0CA00587BE1 /* Resources */,
@@ -532,6 +608,53 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		8031589B963DCAA5F24AF881 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Zalo-File Download ManagerTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		956CBE6BEFB3B137878D6806 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Zalo-File Download Manager-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		0417EF1D242DD0CA00587BE1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -576,8 +699,10 @@
 				043E163F24323B63003CDE74 /* NINetworkActivity.m in Sources */,
 				043E164724323B63003CDE74 /* NIState.m in Sources */,
 				043E163E24323B63003CDE74 /* NIOperations.m in Sources */,
+				0496D5E62440BDCD007826F8 /* Reachability.m in Sources */,
 				043E165324323B63003CDE74 /* NIRadioGroup.m in Sources */,
 				043E163D24323B63003CDE74 /* NIViewRecycler.m in Sources */,
+				04DE9CB3244164330058C31E /* Connectivity.m in Sources */,
 				04F79D8124336F7E00517235 /* DownloadDataCache.m in Sources */,
 				043E164A24323B63003CDE74 /* NIFoundationMethods.m in Sources */,
 				043E163C24323B63003CDE74 /* NICommonMetrics.m in Sources */,
@@ -597,6 +722,8 @@
 				04B501AA243A239E002AF22F /* FileDownloadManager.m in Sources */,
 				04B501A6243A1840002AF22F /* TaskOperatorManager.m in Sources */,
 				040F461F2432E76E00321B75 /* FileDownloadTableViewModel.m in Sources */,
+				0496D5E72440BDCD007826F8 /* Reachability.m in Sources */,
+				04DE9CB4244164330058C31E /* Connectivity.m in Sources */,
 				04E84FBA24323F5C004557A3 /* FileDownloadCell.m in Sources */,
 				045A31292438C78000F9E887 /* TaskOperator.m in Sources */,
 				0417EF56242DD15300587BE1 /* MainViewController.m in Sources */,
@@ -737,6 +864,7 @@
 		};
 		0417EF49242DD0CA00587BE1 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4E31DC127B185A753E7755FE /* Pods-Zalo-File Download Manager.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -754,6 +882,7 @@
 		};
 		0417EF4A242DD0CA00587BE1 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E51F494FA23C46A42E6363EB /* Pods-Zalo-File Download Manager.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -771,6 +900,7 @@
 		};
 		0417EF4C242DD0CA00587BE1 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E2DB27F19CFC90EFFDE85930 /* Pods-Zalo-File Download ManagerTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -791,6 +921,7 @@
 		};
 		0417EF4D242DD0CA00587BE1 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2CA1F0438A4C52799455766E /* Pods-Zalo-File Download ManagerTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;

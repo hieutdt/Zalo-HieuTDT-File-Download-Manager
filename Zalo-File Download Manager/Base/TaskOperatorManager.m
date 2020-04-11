@@ -38,12 +38,15 @@
         return;
     
     dispatch_async(self.serialQueue, ^{
-        [self addTaskOperatorToQueue:taskOperator];
+        [self pushTaskOperatorToQueue:taskOperator];
         taskOperator.delegate = self;
         
-        if (self.workingTaskCount <= maxCurrentTask) {
-            TaskOperator *task = [self nextTaskOperator];
-            [task execute];
+        if (self.workingTaskCount < MAX_CURRENT_TASK) {
+            TaskOperator *task = [self popTaskOperator];
+            if (task) {
+                self.workingTaskCount++;
+                [task execute];
+            }
         }
     });
 }
@@ -59,7 +62,7 @@
 
 #pragma mark - InternalMethods
 
-- (void)addTaskOperatorToQueue:(TaskOperator *)taskOperator {
+- (void)pushTaskOperatorToQueue:(TaskOperator *)taskOperator {
     if (!taskOperator)
         return;
     
@@ -70,23 +73,24 @@
     } else {
         [self.lowPriorityTasks addObject:taskOperator];
     }
-    
-    self.workingTaskCount++;
 }
 
-- (TaskOperator *)nextTaskOperator {
+- (TaskOperator *)popTaskOperator {
     TaskOperator *task = [self.highPriorityTasks firstObject];
     if (task) {
+        [self.highPriorityTasks removeObject:task];
         return task;
     }
     
     task = [self.normalPriorityTasks firstObject];
     if (task) {
+        [self.normalPriorityTasks removeObject:task];
         return task;
     }
     
     task = [self.lowPriorityTasks firstObject];
     if (task) {
+        [self.lowPriorityTasks removeObject:task];
         return task;
     }
     
@@ -98,14 +102,13 @@
 - (void)taskOperatorDidFinish:(nonnull TaskOperator *)taskOperator {
     self.workingTaskCount--;
     
-    if ([self.highPriorityTasks containsObject:taskOperator]) {
-        [self.highPriorityTasks removeObject:taskOperator];
-        
-    } else if ([self.normalPriorityTasks containsObject:taskOperator]) {
-        [self.normalPriorityTasks removeObject:taskOperator];
-        
-    } else if ([self.lowPriorityTasks containsObject:taskOperator]) {
-        [self.lowPriorityTasks removeObject:taskOperator];
+    if (self.workingTaskCount < MAX_CURRENT_TASK && self.workingTaskCount >= 0) {
+        dispatch_async(self.serialQueue, ^{
+            TaskOperator *task = [self popTaskOperator];
+            if (task) {
+                [task execute];
+            }
+        });
     }
 }
 

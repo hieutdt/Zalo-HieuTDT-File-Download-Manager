@@ -15,6 +15,7 @@
 #import "FileDownloadCell.h"
 
 #import "FileDownloadManager.h"
+#import "Connectivity.h"
 
 @interface MainViewController () <UITableViewDelegate, FileDownloadTableViewModelDelegate>
 
@@ -126,6 +127,9 @@
 }
 
 - (void)downloadButtonTapped {
+    int timeOutForRequest = 30;
+    int timeOutForResource = [self timeOutForResourceByConnectivity];
+    
     _tableViewModel = [[FileDownloadTableViewModel alloc] initWithListArray:self.fileViewModels];
     _tableViewModel.delegate = self;
     
@@ -138,7 +142,8 @@
         FileDownloadViewModel *viewModel = self.fileViewModels[i];
         [[FileDownloadManager instance] performDownloadFileWithUrl:viewModel.url
                                                           priority:TaskPriorityNormal
-                                         timeOutIntervalForRequest:30
+                                         timeOutIntervalForRequest:timeOutForRequest
+                                        timeOutIntervalForResource:timeOutForResource
                                                    progressHandler:self.progressHandler
                                                  completionHandler:self.completionHandler];
     }
@@ -187,6 +192,18 @@
             }];
         });
     }
+}
+
+- (int)timeOutForResourceByConnectivity {
+    int timeOutForResource = 0;
+    ConnectState connectState = [[Connectivity instance] currentNetwork];
+    if (connectState == ConnectStateWifi) {
+        timeOutForResource = 3600 * 5;
+    } else if (connectState == ConnectState3G4G) {
+        timeOutForResource = 3600;
+    }
+    
+    return timeOutForResource;
 }
 
 
@@ -242,7 +259,12 @@
             return;
         }
         
+        int timeOutForRequest = 30;
+        int timeOutForResource = [self timeOutForResourceByConnectivity];
+        
         [[FileDownloadManager instance] resumeDownloadFileWithUrl:self.fileViewModels[index].url
+                                        timeOutIntervalForRequest:timeOutForRequest
+                                       timeOutIntervalForResource:timeOutForResource
                                                 completionHandler:^(NSString * _Nonnull url, NSError *error) {
             if (!url)
                 return;
@@ -295,7 +317,12 @@
             return;
         }
         
+        int timeOutForRequest = 30;
+        int timeOutForResource = [self timeOutForResourceByConnectivity];
+        
         [[FileDownloadManager instance] retryDownloadFileWithUrl:self.fileViewModels[index].url
+                                       timeOutIntervalForRequest:timeOutForRequest
+                                      timeOutIntervalForResource:timeOutForResource
                                                completionHandler:^(NSString * _Nonnull url, NSError *error) {
             if (!error) {
                 [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:0];

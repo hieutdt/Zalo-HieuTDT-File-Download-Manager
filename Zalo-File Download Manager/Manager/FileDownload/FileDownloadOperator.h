@@ -25,7 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithFileDownloadItem:(FileDownloadItem *)item
                                 priority:(TaskPriority)priority
-                       timeOutForRequest:(int)timeOut
+                       timeOutForRequest:(int)timeOutForRequest
+                      timeOutForResource:(int)timeOutForResource
                            callBackQueue:(dispatch_queue_t)callBackQueue;
 
 
@@ -36,6 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
                                callBackQueue:(dispatch_queue_t)callBackQueue;
 
 - (void)updateTaskToResumeDownloadWithPriority:(TaskPriority)priority
+                             timeOutForRequest:(int)timeOutForRequest
+                            timeOutForResource:(int)timeOutForResource
                              completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
                                  callBackQueue:(dispatch_queue_t)callBackQueue;
 
@@ -44,7 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
                          callBackQueue:(dispatch_queue_t)callBackQueue;
 
 - (void)updateTaskToReDownloadWithPriority:(TaskPriority)priority
-                         timeOutForRequest:(int)timeOut
+                         timeOutForRequest:(int)timeOutForRequest
+                        timeOutForResoucre:(int)timeOutForResource
                          completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
                              callBackQueue:(dispatch_queue_t)callBackQueue;
 

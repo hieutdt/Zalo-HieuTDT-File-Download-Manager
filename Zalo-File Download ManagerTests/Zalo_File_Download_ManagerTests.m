@@ -7,19 +7,15 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "TaskOperatorManager.h"
-#import "TaskOperator.h"
 
 @interface Zalo_File_Download_ManagerTests : XCTestCase
-
-@property (nonatomic, strong) TaskOperatorManager *manager;
 
 @end
 
 @implementation Zalo_File_Download_ManagerTests
 
 - (void)setUp {
-    _manager = [[TaskOperatorManager alloc] init];
+    
 }
 
 - (void)tearDown {
@@ -29,13 +25,6 @@
 - (void)testExample {
     // This is an example of a functional test case.
     // Use XCTAssert and related functions to verify your tests produce the correct results.
-    dispatch_apply(20, dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^(size_t size){
-        TaskOperator *operator = [[TaskOperator alloc] initWithTaskBlock:^{
-            NSLog(@"Task %d", size);
-            sleep(2);
-        } priority:TaskPriorityHigh];
-        [self.manager performTaskOperator:operator];
-    });
 }
 
 - (void)testPerformanceExample {

@@ -9,6 +9,7 @@
 #import "FileDownloadManager.h"
 #import "FileDownloadOperator.h"
 #import "FileDownloadItem.h"
+#import "Connectivity.h"
 
 @interface FileDownloadManager ()
 
@@ -37,7 +38,8 @@
 
 - (void)performDownloadFileWithUrl:(NSString *)url
                           priority:(TaskPriority)priority
-         timeOutIntervalForRequest:(int)timeOut
+         timeOutIntervalForRequest:(int)timeOutForRequest
+        timeOutIntervalForResource:(int)timeOutForResource
                    progressHandler:(void (^)(NSString *url, long long bytesWritten, long long totalBytes))progressHandler
                  completionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler {
     if (!url || !progressHandler || !completionHandler)
@@ -51,9 +53,11 @@
         FileDownloadItem *downloadItem = [[FileDownloadItem alloc] initWithDownloadUrl:url
                                                                        progressHandler:progressHandler
                                                                      completionHandler:completionHandler];
+        
         FileDownloadOperator *downloadOperator = [[FileDownloadOperator alloc] initWithFileDownloadItem:downloadItem
                                                                                                priority:priority
-                                                                                      timeOutForRequest:timeOut
+                                                                                      timeOutForRequest:timeOutForRequest
+                                                                                     timeOutForResource:timeOutForResource
                                                                                           callBackQueue:self.serialQueue];
         
         if ([self.fileOperatorDictionary valueForKey:url]) {
@@ -93,6 +97,8 @@
 }
 
 - (void)resumeDownloadFileWithUrl:(NSString *)url
+        timeOutIntervalForRequest:(int)timeOutForRequest
+       timeOutIntervalForResource:(int)timeOutForResource
                 completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
     if (!url)
         return;
@@ -110,6 +116,8 @@
         }
         
         [downloadOperator updateTaskToResumeDownloadWithPriority:TaskPriorityHigh
+                                               timeOutForRequest:timeOutForRequest
+                                              timeOutForResource:timeOutForResource
                                                completionHandler:^(NSString * _Nonnull url, NSError *error) {
             if (completionHandler) {
                 completionHandler(url, error);
@@ -147,6 +155,8 @@
 }
 
 - (void)retryDownloadFileWithUrl:(NSString *)url
+       timeOutIntervalForRequest:(int)timeOutForRequest
+      timeOutIntervalForResource:(int)timeOutForResource
                completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
     if (!url)
         return;
@@ -163,7 +173,8 @@
         }
         
         [downloadOperator updateTaskToReDownloadWithPriority:TaskPriorityHigh
-                                           timeOutForRequest:30
+                                           timeOutForRequest:timeOutForRequest
+                                          timeOutForResoucre:timeOutForResource
                                            completionHandler:^(NSString * _Nonnull url, NSError *error) {
             if (completionHandler) {
                 completionHandler(url, error);

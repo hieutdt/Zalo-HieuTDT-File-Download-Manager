@@ -36,17 +36,25 @@
     return [self initWithFileDownloadItem:item
                                  priority:priority
                         timeOutForRequest:30
+                       timeOutForResource:86400
                             callBackQueue:callBackQueue];
 }
 
 - (instancetype)initWithFileDownloadItem:(FileDownloadItem *)item
                                 priority:(TaskPriority)priority
-                       timeOutForRequest:(int)timeOut
+                       timeOutForRequest:(int)timeOutForRequest
+                      timeOutForResource:(int)timeOutForResource
                            callBackQueue:(dispatch_queue_t)callBackQueue {
     self = [super init];
     if (self) {
         _item = item;
-        _downloadTask = [self downloadTaskFromUrl:item.url timeOutIntervalForRequest:timeOut];
+        if (item) {
+            _downloadTask = [self downloadTaskFromUrl:item.url
+                        timeOutIntervalForRequest:timeOutForRequest
+                               timeOutForResource:timeOutForResource];
+        } else {
+            _downloadTask = nil;
+        }
         _callBackQueue = callBackQueue;
         
         __weak FileDownloadOperator *weakSelf = self;
@@ -92,6 +100,8 @@
 }
 
 - (void)updateTaskToResumeDownloadWithPriority:(TaskPriority)priority
+                             timeOutForRequest:(int)timeOutForRequest
+                            timeOutForResource:(int)timeOutForResource
                              completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
                                  callBackQueue:(dispatch_queue_t)callBackQueue {
     if (!completionHandler)
@@ -100,7 +110,9 @@
     __weak FileDownloadOperator *weakSelf = self;
     NSData *resumeData = [[DownloadDataCache instance] dataForKey:self.item.url];
     
-    self.downloadTask = [self downloadTaskFromResumeData:resumeData timeOutIntervalForRequest:30];
+    self.downloadTask = [self downloadTaskFromResumeData:resumeData
+                               timeOutIntervalForRequest:timeOutForRequest
+                                      timeOutForResource:timeOutForResource];
     self.priority = priority;
     self.taskBlock = ^{
         if (weakSelf.downloadTask) {
@@ -143,7 +155,8 @@
 }
 
 - (void)updateTaskToReDownloadWithPriority:(TaskPriority)priority
-                         timeOutForRequest:(int)timeOut
+                         timeOutForRequest:(int)timeOutForRequest
+                        timeOutForResoucre:(int)timeOutForResource
                          completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
                              callBackQueue:(dispatch_queue_t)callBackQueue {
     if (!completionHandler)
@@ -153,7 +166,8 @@
     self.priority = priority;
     self.taskBlock = ^{
         weakSelf.downloadTask = [weakSelf downloadTaskFromUrl:weakSelf.item.url
-                                    timeOutIntervalForRequest:timeOut];
+                                    timeOutIntervalForRequest:timeOutForRequest
+                                           timeOutForResource:timeOutForResource];
         [weakSelf.downloadTask resume];
         weakSelf.running = YES;
         
@@ -166,12 +180,14 @@
 #pragma mark - GenerateDownloadTask
 
 - (NSURLSessionDownloadTask *)downloadTaskFromUrl:(NSString *)url
-                        timeOutIntervalForRequest:(int)timeOut {
+                        timeOutIntervalForRequest:(int)timeOutForRequest
+                               timeOutForResource:(int)timeOutForResource {
     if (!url)
         return nil;
     
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@", self.item.url]];
-    configuration.timeoutIntervalForRequest = timeOut;
+    configuration.timeoutIntervalForRequest = timeOutForRequest;
+    configuration.timeoutIntervalForResource = timeOutForResource;
     configuration.discretionary = YES;
     configuration.sessionSendsLaunchEvents = YES;
     
@@ -183,12 +199,14 @@
 }
 
 - (NSURLSessionDownloadTask *)downloadTaskFromResumeData:(NSData *)resumeData
-                               timeOutIntervalForRequest:(int)timeOut {
+                               timeOutIntervalForRequest:(int)timeOutForRequest
+                                      timeOutForResource:(int)timeOutForResource {
     if (!resumeData)
         return nil;
     
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"%@", self.item.url]];
-    configuration.timeoutIntervalForRequest = timeOut;
+    configuration.timeoutIntervalForRequest = timeOutForRequest;
+    configuration.timeoutIntervalForResource = timeOutForResource;
     configuration.discretionary = YES;
     configuration.sessionSendsLaunchEvents = YES;
 
