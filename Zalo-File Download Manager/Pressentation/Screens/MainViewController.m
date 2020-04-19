@@ -119,10 +119,14 @@
     self.view.backgroundColor = [UIColor whiteColor];
     self.title = @"Download Manager";
     
-    _downloadBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Download" style:UIBarButtonItemStylePlain target:self action:@selector(downloadButtonTapped)];
+    _downloadBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Download"
+                                                          style:UIBarButtonItemStylePlain
+                                                         target:self
+                                                         action:@selector(downloadButtonTapped)];
     self.navigationItem.rightBarButtonItem = _downloadBarButton;
     
-    _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    _tableView = [[UITableView alloc] initWithFrame:self.view.bounds
+                                              style:UITableViewStylePlain];
     _tableView.tableFooterView = [[UIView alloc] init];
     [self.view addSubview:_tableView];
 }
@@ -148,7 +152,6 @@
                                         timeOutIntervalForResource:timeOutForResource
                                                    progressHandler:self.progressHandler
                                                  completionHandler:self.completionHandler];
-        }
     }
     
     // Hide that download button after clicked
