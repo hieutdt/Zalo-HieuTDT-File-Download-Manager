@@ -13,7 +13,6 @@
 
 @interface FileDownloadOperator () <NSURLSessionDownloadDelegate, NSURLSessionDelegate>
 
-@property (nonatomic, strong) FileDownloadItem *item;
 @property (nonatomic, strong) NSURLSessionDownloadTask *downloadTask;
 @property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) dispatch_queue_t callBackQueue;
@@ -25,7 +24,6 @@
 - (instancetype)init {
     self = [super initWithTaskBlock:^{} priority:TaskPriorityNormal];
     if (self) {
-        _running = NO;
     }
     return self;
 }
@@ -50,8 +48,8 @@
         _item = item;
         if (item) {
             _downloadTask = [self downloadTaskFromUrl:item.url
-                        timeOutIntervalForRequest:timeOutForRequest
-                               timeOutForResource:timeOutForResource];
+                            timeOutIntervalForRequest:timeOutForRequest
+                                   timeOutForResource:timeOutForResource];
         } else {
             _downloadTask = nil;
         }
@@ -60,9 +58,22 @@
         __weak FileDownloadOperator *weakSelf = self;
         self.priority = priority;
         self.taskBlock = ^{
+            // If this file has been downloaded
+            if ([[URLDownloadCache instance] pathForUrl:weakSelf.item.url]) {
+                NSLog(@"TONHIEU: %@", [[URLDownloadCache instance] pathForUrl:weakSelf.item.url]);
+                
+                for (int i = 0; i < weakSelf.item.completionHandlers.count; i++) {
+                    weakSelf.item.completionHandlers[i](weakSelf.item.url, [[URLDownloadCache instance] pathForUrl:weakSelf.item.url], nil);
+                }
+                
+                [weakSelf removeAllProgressHandlers];
+                [weakSelf removeAllCompletionHandlers];
+                [weakSelf finish];
+                return;
+            }
+            
             if (weakSelf.downloadTask) {
                 [weakSelf.downloadTask resume];
-                weakSelf.running = YES;
             }
         };
     }
@@ -93,7 +104,6 @@
                         completionHandler(weakSelf.item.url, error);
                     });
                 }
-                weakSelf.running = NO;
             }];
         }
     };
@@ -118,7 +128,6 @@
         if (weakSelf.downloadTask) {
             [weakSelf.downloadTask resume];
             [[DownloadDataCache instance] removeDataByKey:weakSelf.item.url];
-            weakSelf.running = YES;
             
             dispatch_async(callBackQueue, ^{
                 completionHandler(weakSelf.item.url, nil);
@@ -145,7 +154,6 @@
     self.taskBlock = ^{
         if (weakSelf.downloadTask) {
             [weakSelf.downloadTask cancel];
-            weakSelf.running = NO;
             
             dispatch_async(callBackQueue, ^{
                 completionHandler(weakSelf.item.url);
@@ -169,13 +177,13 @@
                                     timeOutIntervalForRequest:timeOutForRequest
                                            timeOutForResource:timeOutForResource];
         [weakSelf.downloadTask resume];
-        weakSelf.running = YES;
         
         dispatch_async(callBackQueue, ^{
             completionHandler(weakSelf.item.url, nil);
         });
     };
 }
+
 
 #pragma mark - GenerateDownloadTask
 
@@ -216,6 +224,34 @@
     return downloadTask;
 }
 
+
+#pragma mark - UpdateHandlers
+
+- (void)addProgressHandler:(void (^)(NSString *url, long long bytesWritten, long long totalBytes))progressHandler {
+    if (self.item && self.item.progressHandlers) {
+        [self.item.progressHandlers addObject:progressHandler];
+    }
+}
+
+- (void)addCompletionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler {
+    if (self.item && self.item.completionHandlers) {
+        [self.item.completionHandlers addObject:completionHandler];
+    }
+}
+
+- (void)removeAllProgressHandlers {
+    if (self.item && self.item.progressHandlers) {
+        [self.item.progressHandlers removeAllObjects];
+    }
+}
+
+- (void)removeAllCompletionHandlers {
+    if (self.item && self.item.completionHandlers) {
+        [self.item.completionHandlers removeAllObjects];
+    }
+}
+
+
 #pragma mark - NSURLSessionDownloadDelegate
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
@@ -223,9 +259,11 @@
                                       totalBytesWritten:(int64_t)totalBytesWritten
                               totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
     
-    if (downloadTask == self.downloadTask && self.item && self.item.progressHandler) {
+    if (downloadTask == self.downloadTask && self.item && self.item.progressHandlers) {
         dispatch_async(self.callBackQueue, ^{
-            self.item.progressHandler(self.item.url, totalBytesWritten, totalBytesExpectedToWrite);
+            for (int i = 0; i < self.item.progressHandlers.count; i++) {
+                self.item.progressHandlers[i](self.item.url, totalBytesWritten, totalBytesExpectedToWrite);
+            }
         });
     }
 }
@@ -234,7 +272,11 @@
                                       didFinishDownloadingToURL:(nonnull NSURL *)location {
     @try {
         NSFileManager *fileManager = NSFileManager.defaultManager;
-        NSURL *documentsURL = [fileManager URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
+        NSURL *documentsURL = [fileManager URLForDirectory:NSDocumentDirectory
+                                                  inDomain:NSUserDomainMask
+                                         appropriateForURL:nil
+                                                    create:NO
+                                                     error:nil];
         NSURL *savedURL = [documentsURL URLByAppendingPathComponent:location.lastPathComponent];
         
         [fileManager moveItemAtURL:location toURL:savedURL error:nil];
@@ -252,13 +294,18 @@
     if (error)
         NSLog(@"URL Session error: %@", error.userInfo);
     
-    if (task && self.item && self.item.completionHandler) {
+    if (task && self.item && self.item.completionHandlers) {
         dispatch_async(self.callBackQueue, ^{
-            self.item.completionHandler(self.item.url, @"", error);
+            for (int i = 0; i < self.item.completionHandlers.count; i++) {
+                self.item.completionHandlers[i](self.item.url, @"", error);
+            }
+            
+            [self removeAllProgressHandlers];
+            [self removeAllCompletionHandlers];
+            
+            [self finish];
         });
     }
-    
-    [self finish];
 }
 
 #pragma mark - NSURLSessionDelegate
@@ -268,7 +315,9 @@
         AppDelegate *appDelegate =  (AppDelegate *)[UIApplication.sharedApplication delegate];
         if (appDelegate) {
             dispatch_block_t backgroundCompletionHandler = appDelegate.backgroundCompletionHandler;
-            backgroundCompletionHandler();
+            if (backgroundCompletionHandler) {
+                backgroundCompletionHandler();
+            }
         }
     });
 }

@@ -44,12 +44,14 @@
                  completionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler {
     if (!url || !progressHandler || !completionHandler)
         return;
-    
-    if ([self.fileOperatorDictionary valueForKey:url] && [self.fileOperatorDictionary valueForKey:url].isRunning) {
-        return;
-    }
 
     dispatch_async(self.serialQueue, ^{
+        if ([self.fileOperatorDictionary valueForKey:url]) {
+            [[self.fileOperatorDictionary objectForKey:url] addProgressHandler:progressHandler];
+            [[self.fileOperatorDictionary objectForKey:url] addCompletionHandler:completionHandler];
+            return;
+        }
+        
         FileDownloadItem *downloadItem = [[FileDownloadItem alloc] initWithDownloadUrl:url
                                                                        progressHandler:progressHandler
                                                                      completionHandler:completionHandler];
@@ -88,7 +90,8 @@
             }
         }
         
-        [downloadOperator updateTaskToPauseDownloadWithPriority:TaskPriorityHigh completionHandler:^(NSString * _Nonnull url, NSError *error) {
+        [downloadOperator updateTaskToPauseDownloadWithPriority:TaskPriorityHigh
+                                              completionHandler:^(NSString * _Nonnull url, NSError *error) {
             completionHandler(url, error);
         } callBackQueue:self.serialQueue];
         
@@ -183,6 +186,19 @@
         
         [self performTaskOperator:downloadOperator];
     });
+}
+
+#pragma mark - Override
+
+- (void)handleTaskOperatorFinish:(TaskOperator *)taskOperator {
+    if (!taskOperator)
+        return;
+    
+    FileDownloadOperator *downloadOperator = (FileDownloadOperator *)taskOperator;
+
+    if (downloadOperator.item) {
+        [self.fileOperatorDictionary removeObjectForKey:downloadOperator.item.url];
+    }
 }
 
 @end

@@ -390,12 +390,12 @@
             [self cancelDownloadFileAtIndex:index];
         }];
     } else if (viewModel.state == FileDownloadCancel) {
-            message = [NSString stringWithFormat:@"%@ đã bị hủy tải xuống. Bạn có muốn?", viewModel.fileName];
-            firstAction = [UIAlertAction actionWithTitle:@"Thử lại"
+        message = [NSString stringWithFormat:@"%@ đã bị hủy tải xuống. Bạn có muốn?", viewModel.fileName];
+        firstAction = [UIAlertAction actionWithTitle:@"Thử lại"
                                                    style:UIAlertActionStyleDefault
                                                  handler:^(UIAlertAction * _Nonnull action) {
-                [self retryDownloadFileAtIndex:index];
-            }];
+            [self retryDownloadFileAtIndex:index];
+        }];
     } else {
         return;
     }

@@ -60,6 +60,10 @@
     });
 }
 
+- (void)handleTaskOperatorFinish:(TaskOperator *)taskOperator {
+    // This method need to be override
+}
+
 #pragma mark - InternalMethods
 
 - (void)pushTaskOperatorToQueue:(TaskOperator *)taskOperator {
@@ -110,6 +114,8 @@
             }
         });
     }
+    
+    [self handleTaskOperatorFinish:taskOperator];
 }
 
 @end

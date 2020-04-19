@@ -19,6 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)performTaskOperator:(TaskOperator *)taskOperator;
 
+- (void)handleTaskOperatorFinish:(TaskOperator *)taskOperator;
+
 @end
 
 NS_ASSUME_NONNULL_END

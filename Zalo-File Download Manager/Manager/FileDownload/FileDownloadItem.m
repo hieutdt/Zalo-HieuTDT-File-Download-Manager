@@ -19,8 +19,8 @@
     if (self) {
         _identifier = [[NSUUID UUID] UUIDString];
         _url = [[NSString alloc] init];
-        _progressHandler = nil;
-        _completionHandler = nil;
+        _progressHandlers = [[NSMutableArray alloc] init];
+        _completionHandlers = [[NSMutableArray alloc] init];
     }
     return self;
 }
@@ -32,8 +32,12 @@
     if (self) {
         _identifier = [[NSUUID UUID] UUIDString];
         _url = url;
-        _progressHandler = progressHandler;
-        _completionHandler = completionHandler;
+        
+        _progressHandlers = [[NSMutableArray alloc] init];
+        [_progressHandlers addObject:progressHandler];
+        
+        _completionHandlers = [[NSMutableArray alloc] init];
+        [_completionHandlers addObject:completionHandler];
     }
     return self;
 }

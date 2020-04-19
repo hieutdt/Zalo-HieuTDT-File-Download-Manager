@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FileDownloadOperator : TaskOperator
 
-@property (nonatomic, assign, getter=isRunning) BOOL running;
+@property (nonatomic, strong) FileDownloadItem *item;
 
 #pragma mark - InitMethods
 
@@ -29,12 +29,18 @@ NS_ASSUME_NONNULL_BEGIN
                       timeOutForResource:(int)timeOutForResource
                            callBackQueue:(dispatch_queue_t)callBackQueue;
 
+#pragma mark - UpdateHandlers
+
+- (void)addProgressHandler:(void (^)(NSString *url, long long bytesWritten, long long totalBytes))progressHandler;
+
+- (void)addCompletionHandler:(void (^)(NSString *url, NSString *locationPath, NSError *error))completionHandler;
+
 
 #pragma mark - UpdateTaskBlockMethods
 
 - (void)updateTaskToPauseDownloadWithPriority:(TaskPriority)priority
-                           completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
-                               callBackQueue:(dispatch_queue_t)callBackQueue;
+                            completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
+                                callBackQueue:(dispatch_queue_t)callBackQueue;
 
 - (void)updateTaskToResumeDownloadWithPriority:(TaskPriority)priority
                              timeOutForRequest:(int)timeOutForRequest
@@ -43,8 +49,8 @@ NS_ASSUME_NONNULL_BEGIN
                                  callBackQueue:(dispatch_queue_t)callBackQueue;
 
 - (void)updateTaskToCancelDownloadWithPriority:(TaskPriority)priority
-                     completionHandler:(void (^)(NSString *url))completionHandler
-                         callBackQueue:(dispatch_queue_t)callBackQueue;
+                             completionHandler:(void (^)(NSString *url))completionHandler
+                                 callBackQueue:(dispatch_queue_t)callBackQueue;
 
 - (void)updateTaskToReDownloadWithPriority:(TaskPriority)priority
                          timeOutForRequest:(int)timeOutForRequest
