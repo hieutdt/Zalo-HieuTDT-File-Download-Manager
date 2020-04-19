@@ -199,7 +199,9 @@
     configuration.discretionary = YES;
     configuration.sessionSendsLaunchEvents = YES;
     
-    _session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];
+    _session = [NSURLSession sessionWithConfiguration:configuration
+                                             delegate:self
+                                        delegateQueue:nil];
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
     
     NSURLSessionDownloadTask *downloadTask = [_session downloadTaskWithRequest:request];
@@ -282,7 +284,8 @@
         [fileManager moveItemAtURL:location toURL:savedURL error:nil];
         
         // Cache this location path
-        [[URLDownloadCache instance] setLocationPath:[savedURL absoluteString] forUrl:self.item.url];
+        [[URLDownloadCache instance] setLocationPath:[savedURL absoluteString]
+                                              forUrl:self.item.url];
         
     } @catch (NSError *error) {
         NSLog(@"Error: %@", error.userInfo);

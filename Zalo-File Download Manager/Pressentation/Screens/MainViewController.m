@@ -142,15 +142,12 @@
     for (int i = 0; i < self.fileViewModels.count; i++) {
         FileDownloadViewModel *viewModel = self.fileViewModels[i];
         
-        if ([[URLDownloadCache instance] pathForUrl:viewModel.url]) {
-            viewModel.state = FileDownloadFinish;
-        } else {
-            [[FileDownloadManager instance] performDownloadFileWithUrl:viewModel.url
-                                                              priority:TaskPriorityNormal
-                                             timeOutIntervalForRequest:timeOutForRequest
-                                            timeOutIntervalForResource:timeOutForResource
-                                                       progressHandler:self.progressHandler
-                                                     completionHandler:self.completionHandler];
+        [[FileDownloadManager instance] performDownloadFileWithUrl:viewModel.url
+                                                          priority:TaskPriorityNormal
+                                         timeOutIntervalForRequest:timeOutForRequest
+                                        timeOutIntervalForResource:timeOutForResource
+                                                   progressHandler:self.progressHandler
+                                                 completionHandler:self.completionHandler];
         }
     }
     

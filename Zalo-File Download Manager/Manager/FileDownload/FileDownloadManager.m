@@ -46,12 +46,14 @@
         return;
 
     dispatch_async(self.serialQueue, ^{
+        // If this URL is downloading, add handlers to DownloadOperator and return
         if ([self.fileOperatorDictionary valueForKey:url]) {
             [[self.fileOperatorDictionary objectForKey:url] addProgressHandler:progressHandler];
             [[self.fileOperatorDictionary objectForKey:url] addCompletionHandler:completionHandler];
             return;
         }
         
+        // Else, create DownloadOperator and perform task
         FileDownloadItem *downloadItem = [[FileDownloadItem alloc] initWithDownloadUrl:url
                                                                        progressHandler:progressHandler
                                                                      completionHandler:completionHandler];
@@ -194,8 +196,8 @@
     if (!taskOperator)
         return;
     
+    // Remove that DownloadOperator from Dictionary
     FileDownloadOperator *downloadOperator = (FileDownloadOperator *)taskOperator;
-
     if (downloadOperator.item) {
         [self.fileOperatorDictionary removeObjectForKey:downloadOperator.item.url];
     }
