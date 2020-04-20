@@ -62,6 +62,7 @@
 		04B501A6243A1840002AF22F /* TaskOperatorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A4243A1840002AF22F /* TaskOperatorManager.m */; };
 		04B501A9243A239E002AF22F /* FileDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A8243A239E002AF22F /* FileDownloadManager.m */; };
 		04B501AA243A239E002AF22F /* FileDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 04B501A8243A239E002AF22F /* FileDownloadManager.m */; };
+		04BB317C244C89F80080654B /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04BB317B244C89F80080654B /* Network.framework */; };
 		04DE9CB3244164330058C31E /* Connectivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DE9CB2244164330058C31E /* Connectivity.m */; };
 		04DE9CB4244164330058C31E /* Connectivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 04DE9CB2244164330058C31E /* Connectivity.m */; };
 		04E165DA2439A330006FE6F1 /* FileDownloadOperator.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E165D92439A330006FE6F1 /* FileDownloadOperator.m */; };
@@ -186,6 +187,7 @@
 		04B501A4243A1840002AF22F /* TaskOperatorManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TaskOperatorManager.m; sourceTree = "<group>"; };
 		04B501A7243A239E002AF22F /* FileDownloadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadManager.h; sourceTree = "<group>"; };
 		04B501A8243A239E002AF22F /* FileDownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileDownloadManager.m; sourceTree = "<group>"; };
+		04BB317B244C89F80080654B /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
 		04DE9CB1244164330058C31E /* Connectivity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Connectivity.h; sourceTree = "<group>"; };
 		04DE9CB2244164330058C31E /* Connectivity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Connectivity.m; sourceTree = "<group>"; };
 		04E165D82439A330006FE6F1 /* FileDownloadOperator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileDownloadOperator.h; sourceTree = "<group>"; };
@@ -209,6 +211,7 @@
 			files = (
 				0496D5E92440BDE8007826F8 /* SystemConfiguration.framework in Frameworks */,
 				B8DBF5ED0725D46B351EB8C2 /* Pods_Zalo_File_Download_Manager.framework in Frameworks */,
+				04BB317C244C89F80080654B /* Network.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -493,6 +496,7 @@
 		4A30178FC21F977D654F90BD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				04BB317B244C89F80080654B /* Network.framework */,
 				0496D5EA2440BE8A007826F8 /* CoreTelephony.framework */,
 				0496D5E82440BDE8007826F8 /* SystemConfiguration.framework */,
 				8DEFDC5B1E8B32B8667CB701 /* Pods_Zalo_File_Download_Manager.framework */,

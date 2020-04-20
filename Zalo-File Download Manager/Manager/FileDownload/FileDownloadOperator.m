@@ -16,6 +16,10 @@
 @property (nonatomic, strong) NSURLSessionDownloadTask *downloadTask;
 @property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) dispatch_queue_t callBackQueue;
+@property (nonatomic, strong) NSString *locationPath;
+
+@property (nonatomic, assign) BOOL isIntegrity;
+@property (nonatomic, assign) BOOL isFinish;
 
 @end
 
@@ -45,6 +49,9 @@
                            callBackQueue:(dispatch_queue_t)callBackQueue {
     self = [super init];
     if (self) {
+        _isIntegrity = NO;
+        _isFinish = NO;
+        _locationPath = [[NSString alloc] init];
         _item = item;
         if (item) {
             _downloadTask = [self downloadTaskFromUrl:item.url
@@ -58,10 +65,8 @@
         __weak FileDownloadOperator *weakSelf = self;
         self.priority = priority;
         self.taskBlock = ^{
-            // If this file has been downloaded
+            // If this file has been downloaded -> finish download
             if ([[URLDownloadCache instance] pathForUrl:weakSelf.item.url]) {
-                NSLog(@"TONHIEU: %@", [[URLDownloadCache instance] pathForUrl:weakSelf.item.url]);
-                
                 for (int i = 0; i < weakSelf.item.completionHandlers.count; i++) {
                     weakSelf.item.completionHandlers[i](weakSelf.item.url, [[URLDownloadCache instance] pathForUrl:weakSelf.item.url], nil);
                 }
@@ -262,6 +267,10 @@
                               totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
     
     if (downloadTask == self.downloadTask && self.item && self.item.progressHandlers) {
+        if (totalBytesWritten == totalBytesExpectedToWrite) {
+            self.isIntegrity = YES;
+        }
+        
         dispatch_async(self.callBackQueue, ^{
             for (int i = 0; i < self.item.progressHandlers.count; i++) {
                 self.item.progressHandlers[i](self.item.url, totalBytesWritten, totalBytesExpectedToWrite);
@@ -286,6 +295,8 @@
         // Cache this location path
         [[URLDownloadCache instance] setLocationPath:[savedURL absoluteString]
                                               forUrl:self.item.url];
+        self.locationPath = [savedURL absoluteString];
+        self.isFinish = YES;
         
     } @catch (NSError *error) {
         NSLog(@"Error: %@", error.userInfo);
@@ -297,10 +308,18 @@
     if (error)
         NSLog(@"URL Session error: %@", error.userInfo);
     
+    NSError *customError = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
+                                                      code:ERROR_GET_RESUME_DATA_FAILED
+                                                  userInfo:@{@"FileDownload không thành công": NSLocalizedDescriptionKey}];
+    
     if (task && self.item && self.item.completionHandlers) {
         dispatch_async(self.callBackQueue, ^{
             for (int i = 0; i < self.item.completionHandlers.count; i++) {
-                self.item.completionHandlers[i](self.item.url, @"", error);
+                if (self.isIntegrity && self.isFinish) {
+                    self.item.completionHandlers[i](self.item.url, self.locationPath, error);
+                } else {
+                    self.item.completionHandlers[i](self.item.url, self.locationPath, customError);
+                }
             }
             
             [self removeAllProgressHandlers];

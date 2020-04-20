@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)instance;
 
-- (ConnectState)currentNetwork;
+- (void)getCurrentNetworkStateWithCompletionHandler:(void (^)(ConnectState state))completionHandler;
 
 @end
 

@@ -132,9 +132,6 @@
 }
 
 - (void)downloadButtonTapped {
-    int timeOutForRequest = 30;
-    int timeOutForResource = [self timeOutForResourceByConnectivity];
-    
     _tableViewModel = [[FileDownloadTableViewModel alloc] initWithListArray:self.fileViewModels];
     _tableViewModel.delegate = self;
     
@@ -143,6 +140,24 @@
     
     [_tableView reloadData];
     
+    int timeOutForRequest = 30;
+    __block int timeOutForResource = 0;
+    [[Connectivity instance] getCurrentNetworkStateWithCompletionHandler:^(ConnectState state) {
+        if (state == ConnectStateWifi) {
+            timeOutForResource = 3600 * 5;
+        } else if (state  == ConnectState3G4G) {
+            timeOutForResource = 3600;
+        }
+        
+        [self executeDownloadWithTimeOutForRequest:timeOutForRequest timeOutForResource:timeOutForResource];
+    }];
+    
+    // Hide that download button after clicked
+    self.navigationItem.rightBarButtonItem = nil;
+}
+
+- (void)executeDownloadWithTimeOutForRequest:(int)timeOutForRequest
+                          timeOutForResource:(int)timeOutForResource {
     for (int i = 0; i < self.fileViewModels.count; i++) {
         FileDownloadViewModel *viewModel = self.fileViewModels[i];
         
@@ -153,9 +168,6 @@
                                                    progressHandler:self.progressHandler
                                                  completionHandler:self.completionHandler];
     }
-    
-    // Hide that download button after clicked
-    self.navigationItem.rightBarButtonItem = nil;
 }
 
 - (void)updateCellAtIndex:(int)index
@@ -201,13 +213,14 @@
 }
 
 - (int)timeOutForResourceByConnectivity {
-    int timeOutForResource = 0;
-    ConnectState connectState = [[Connectivity instance] currentNetwork];
-    if (connectState == ConnectStateWifi) {
-        timeOutForResource = 3600 * 5;
-    } else if (connectState == ConnectState3G4G) {
-        timeOutForResource = 3600;
-    }
+    __block int timeOutForResource = 0;
+    [[Connectivity instance] getCurrentNetworkStateWithCompletionHandler:^(ConnectState state) {
+        if (state == ConnectStateWifi) {
+            timeOutForResource = 3600 * 5;
+        } else if (state  == ConnectState3G4G) {
+            timeOutForResource = 3600;
+        }
+    }];
     
     return timeOutForResource;
 }
@@ -266,27 +279,43 @@
         }
         
         int timeOutForRequest = 30;
-        int timeOutForResource = [self timeOutForResourceByConnectivity];
+        __block int timeOutForResource = [self timeOutForResourceByConnectivity];
         
-        [[FileDownloadManager instance] resumeDownloadFileWithUrl:self.fileViewModels[index].url
-                                        timeOutIntervalForRequest:timeOutForRequest
-                                       timeOutIntervalForResource:timeOutForResource
-                                                completionHandler:^(NSString * _Nonnull url, NSError *error) {
-            if (!url)
-                return;
-            if ([url isEqualToString:self.fileViewModels[index].url]) {
-                if (!error) {
-                    [self updateCellAtIndex:index
-                                  withState:FileDownloading
-                               bytesWritten:self.fileViewModels[index].bytesWritten
-                                 totalBytes:self.fileViewModels[index].totalBytes];
-                } else {
-                    NSLog(@"Error: %@", error.userInfo);
-                    [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:0];
-                }
+        [[Connectivity instance] getCurrentNetworkStateWithCompletionHandler:^(ConnectState state) {
+            if (state == ConnectStateWifi) {
+                timeOutForResource = 3600 * 5;
+            } else if (state  == ConnectState3G4G) {
+                timeOutForResource = 3600;
             }
+            
+            [self resumeWithTimeOutForRequest:timeOutForRequest
+                           timeOutForResource:timeOutForResource
+                                        index:index];
         }];
     }
+}
+
+- (void)resumeWithTimeOutForRequest:(int)timeOutForRequest
+                 timeOutForResource:(int)timeOutForResource
+                              index:(int)index {
+    [[FileDownloadManager instance] resumeDownloadFileWithUrl:self.fileViewModels[index].url
+                                    timeOutIntervalForRequest:timeOutForRequest
+                                   timeOutIntervalForResource:timeOutForResource
+                                            completionHandler:^(NSString * _Nonnull url, NSError *error) {
+        if (!url)
+            return;
+        if ([url isEqualToString:self.fileViewModels[index].url]) {
+            if (!error) {
+                [self updateCellAtIndex:index
+                              withState:FileDownloading
+                           bytesWritten:self.fileViewModels[index].bytesWritten
+                             totalBytes:self.fileViewModels[index].totalBytes];
+            } else {
+                NSLog(@"Error: %@", error.userInfo);
+                [self updateCellAtIndex:index withState:FileDownloadCancel bytesWritten:0 totalBytes:0];
+            }
+        }
+    }];
 }
 
 - (void)cancelDownloadFileAtIndex:(int)index {
@@ -324,19 +353,34 @@
         }
         
         int timeOutForRequest = 30;
-        int timeOutForResource = [self timeOutForResourceByConnectivity];
-        
-        [[FileDownloadManager instance] retryDownloadFileWithUrl:self.fileViewModels[index].url
-                                       timeOutIntervalForRequest:timeOutForRequest
-                                      timeOutIntervalForResource:timeOutForResource
-                                               completionHandler:^(NSString * _Nonnull url, NSError *error) {
-            if (!error) {
-                [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:0];
-            } else {
-                // Show notification
+        __block int timeOutForResource = 0;
+        [[Connectivity instance] getCurrentNetworkStateWithCompletionHandler:^(ConnectState state) {
+            if (state == ConnectStateWifi) {
+                timeOutForResource = 3600 * 5;
+            } else if (state  == ConnectState3G4G) {
+                timeOutForResource = 3600;
             }
+            
+            [self retryDownloadFileAtIndex:index
+                         timeOutForRequest:timeOutForRequest
+                        timeOutForResource:timeOutForResource];
         }];
     }
+}
+
+- (void)retryDownloadFileAtIndex:(int)index
+               timeOutForRequest:(int)timeOutForRequest
+              timeOutForResource:(int)timeOutForResource {
+    [[FileDownloadManager instance] retryDownloadFileWithUrl:self.fileViewModels[index].url
+                                   timeOutIntervalForRequest:timeOutForRequest
+                                  timeOutIntervalForResource:timeOutForResource
+                                           completionHandler:^(NSString * _Nonnull url, NSError *error) {
+        if (!error) {
+            [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:0];
+        } else {
+            // Show notification
+        }
+    }];
 }
 
 - (int)getSameUrlRunningTasksCount:(NSString *)url {
@@ -392,15 +436,17 @@
     } else if (viewModel.state == FileDownloadCancel) {
         message = [NSString stringWithFormat:@"%@ đã bị hủy tải xuống. Bạn có muốn?", viewModel.fileName];
         firstAction = [UIAlertAction actionWithTitle:@"Thử lại"
-                                                   style:UIAlertActionStyleDefault
-                                                 handler:^(UIAlertAction * _Nonnull action) {
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction * _Nonnull action) {
             [self retryDownloadFileAtIndex:index];
         }];
     } else {
         return;
     }
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Thông báo" message:message preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Thông báo"
+                                                                   message:message
+                                                            preferredStyle:UIAlertControllerStyleActionSheet];
 
     if (firstAction)
         [alert addAction:firstAction];
