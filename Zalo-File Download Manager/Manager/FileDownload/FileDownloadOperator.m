@@ -66,7 +66,9 @@
         self.priority = priority;
         self.taskBlock = ^{
             // If this file has been downloaded -> finish download
-            if ([[URLDownloadCache instance] pathForUrl:weakSelf.item.url]) {
+            NSString *cacheLocationPath = [[URLDownloadCache instance] pathForUrl:weakSelf.item.url];
+            
+            if (cacheLocationPath && [self fileExisted:cacheLocationPath]) {
                 for (int i = 0; i < weakSelf.item.completionHandlers.count; i++) {
                     weakSelf.item.completionHandlers[i](weakSelf.item.url, [[URLDownloadCache instance] pathForUrl:weakSelf.item.url], nil);
                 }
@@ -83,6 +85,11 @@
         };
     }
     return self;
+}
+
+- (BOOL)fileExisted:(NSString *)path {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    return [fileManager fileExistsAtPath:path];
 }
 
 #pragma mark - UpdateTaskBlock
@@ -159,6 +166,8 @@
     self.taskBlock = ^{
         if (weakSelf.downloadTask) {
             [weakSelf.downloadTask cancel];
+            [weakSelf.session finishTasksAndInvalidate];
+            [weakSelf finish];
             
             dispatch_async(callBackQueue, ^{
                 completionHandler(weakSelf.item.url);
@@ -166,29 +175,6 @@
         }
     };
 }
-
-- (void)updateTaskToReDownloadWithPriority:(TaskPriority)priority
-                         timeOutForRequest:(int)timeOutForRequest
-                        timeOutForResoucre:(int)timeOutForResource
-                         completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
-                             callBackQueue:(dispatch_queue_t)callBackQueue {
-    if (!completionHandler)
-        return;
-    
-    __weak FileDownloadOperator *weakSelf = self;
-    self.priority = priority;
-    self.taskBlock = ^{
-        weakSelf.downloadTask = [weakSelf downloadTaskFromUrl:weakSelf.item.url
-                                    timeOutIntervalForRequest:timeOutForRequest
-                                           timeOutForResource:timeOutForResource];
-        [weakSelf.downloadTask resume];
-        
-        dispatch_async(callBackQueue, ^{
-            completionHandler(weakSelf.item.url, nil);
-        });
-    };
-}
-
 
 #pragma mark - GenerateDownloadTask
 
@@ -265,6 +251,7 @@
                                            didWriteData:(int64_t)bytesWritten
                                       totalBytesWritten:(int64_t)totalBytesWritten
                               totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+    NSLog(@"Downloading");
     
     if (downloadTask == self.downloadTask && self.item && self.item.progressHandlers) {
         if (totalBytesWritten == totalBytesExpectedToWrite) {
@@ -282,20 +269,10 @@
 - (void)URLSession:(nonnull NSURLSession *)session downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask
                                       didFinishDownloadingToURL:(nonnull NSURL *)location {
     @try {
-        NSFileManager *fileManager = NSFileManager.defaultManager;
-        NSURL *documentsURL = [fileManager URLForDirectory:NSDocumentDirectory
-                                                  inDomain:NSUserDomainMask
-                                         appropriateForURL:nil
-                                                    create:NO
-                                                     error:nil];
-        NSURL *savedURL = [documentsURL URLByAppendingPathComponent:location.lastPathComponent];
-        
-        [fileManager moveItemAtURL:location toURL:savedURL error:nil];
-        
         // Cache this location path
-        [[URLDownloadCache instance] setLocationPath:[savedURL absoluteString]
+        [[URLDownloadCache instance] setLocationPath:[location absoluteString]
                                               forUrl:self.item.url];
-        self.locationPath = [savedURL absoluteString];
+        self.locationPath = [location absoluteString];
         self.isFinish = YES;
         
     } @catch (NSError *error) {
@@ -306,7 +283,7 @@
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
                            didCompleteWithError:(NSError *)error {
     if (error)
-        NSLog(@"URL Session error: %@", error.userInfo);
+        NSLog(@"TONHIEU: URL Session error: %@", error.userInfo);
     
     NSError *customError = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
                                                       code:ERROR_GET_RESUME_DATA_FAILED
@@ -320,6 +297,10 @@
                 } else {
                     self.item.completionHandlers[i](self.item.url, self.locationPath, customError);
                 }
+            }
+            
+            if (self.downloadTask) {
+                [self.downloadTask cancel];
             }
             
             [self removeAllProgressHandlers];

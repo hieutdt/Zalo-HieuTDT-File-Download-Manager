@@ -159,37 +159,6 @@
     });
 }
 
-- (void)retryDownloadFileWithUrl:(NSString *)url
-       timeOutIntervalForRequest:(int)timeOutForRequest
-      timeOutIntervalForResource:(int)timeOutForResource
-               completionHandler:(void (^)(NSString *url, NSError *error))completionHandler {
-    if (!url)
-        return;
-    
-    dispatch_async(self.serialQueue, ^{
-        FileDownloadOperator *downloadOperator = [self.fileOperatorDictionary objectForKey:url];
-        if (!downloadOperator) {
-            NSError *error = [[NSError alloc] initWithDomain:@"FileDownloadOperator"
-                                                        code:ERROR_GET_OPERATOR_FAILED
-                                                    userInfo:@{@"Can't find DownloadOperator": NSLocalizedDescriptionKey}];
-            if (completionHandler) {
-                completionHandler(url, error);
-            }
-        }
-        
-        [downloadOperator updateTaskToReDownloadWithPriority:TaskPriorityHigh
-                                           timeOutForRequest:timeOutForRequest
-                                          timeOutForResoucre:timeOutForResource
-                                           completionHandler:^(NSString * _Nonnull url, NSError *error) {
-            if (completionHandler) {
-                completionHandler(url, error);
-            }
-        } callBackQueue:self.serialQueue];
-        
-        [self performTaskOperator:downloadOperator];
-    });
-}
-
 #pragma mark - Override
 
 - (void)handleTaskOperatorFinish:(TaskOperator *)taskOperator {

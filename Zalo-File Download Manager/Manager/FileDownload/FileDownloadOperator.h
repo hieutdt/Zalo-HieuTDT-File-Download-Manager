@@ -52,12 +52,6 @@ NS_ASSUME_NONNULL_BEGIN
                              completionHandler:(void (^)(NSString *url))completionHandler
                                  callBackQueue:(dispatch_queue_t)callBackQueue;
 
-- (void)updateTaskToReDownloadWithPriority:(TaskPriority)priority
-                         timeOutForRequest:(int)timeOutForRequest
-                        timeOutForResoucre:(int)timeOutForResource
-                         completionHandler:(void (^)(NSString *url, NSError *error))completionHandler
-                             callBackQueue:(dispatch_queue_t)callBackQueue;
-
 @end
 
 NS_ASSUME_NONNULL_END

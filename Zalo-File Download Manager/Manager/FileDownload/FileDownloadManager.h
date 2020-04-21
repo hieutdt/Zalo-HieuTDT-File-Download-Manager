@@ -35,11 +35,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)cancelDownloadFileWithUrl:(NSString *)url
                 completionHandler:(void (^)(NSString *url))completionHandler;
 
-- (void)retryDownloadFileWithUrl:(NSString *)url
-       timeOutIntervalForRequest:(int)timeOutForRequest
-      timeOutIntervalForResource:(int)timeOutForResource
-               completionHandler:(void (^)(NSString *url, NSError *error))completionHandler;
-
 @end
 
 NS_ASSUME_NONNULL_END

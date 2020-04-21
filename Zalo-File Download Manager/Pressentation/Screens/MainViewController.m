@@ -51,11 +51,12 @@
     ];
     
     for (int i = 0; i < 5; i++) {
-        FileDownloadViewModel *viewModel = [[FileDownloadViewModel alloc] initWithFileName:[NSString stringWithFormat:@"Tập tin %d", i]
-                                                                                       url:urls[i]
-                                                                                     state:FileDownloading
-                                                                                totalBytes:0
-                                                                              bytesWritten:0];
+        FileDownloadViewModel *viewModel = [[FileDownloadViewModel alloc]
+                                            initWithFileName:[NSString stringWithFormat:@"Tập tin %d", i]
+                                            url:urls[i]
+                                            state:FileDownloading
+                                            totalBytes:0
+                                            bytesWritten:0];
         [self.fileViewModels addObject:viewModel];
         
         NSMutableArray *hashMapObject = [_urlHashMap valueForKey:viewModel.url];
@@ -371,16 +372,14 @@
 - (void)retryDownloadFileAtIndex:(int)index
                timeOutForRequest:(int)timeOutForRequest
               timeOutForResource:(int)timeOutForResource {
-    [[FileDownloadManager instance] retryDownloadFileWithUrl:self.fileViewModels[index].url
-                                   timeOutIntervalForRequest:timeOutForRequest
-                                  timeOutIntervalForResource:timeOutForResource
-                                           completionHandler:^(NSString * _Nonnull url, NSError *error) {
-        if (!error) {
-            [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:0];
-        } else {
-            // Show notification
-        }
-    }];
+    [[FileDownloadManager instance] performDownloadFileWithUrl:self.fileViewModels[index].url
+                                                      priority:TaskPriorityNormal
+                                     timeOutIntervalForRequest:timeOutForRequest
+                                    timeOutIntervalForResource:timeOutForResource
+                                               progressHandler:self.progressHandler
+                                             completionHandler:self.completionHandler];
+    
+    [self updateCellAtIndex:index withState:FileDownloading bytesWritten:0 totalBytes:0];
 }
 
 - (int)getSameUrlRunningTasksCount:(NSString *)url {
