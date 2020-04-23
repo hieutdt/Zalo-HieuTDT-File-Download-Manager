@@ -85,10 +85,10 @@
 - (void)getCurrentNetworkStateWithCompletionHandler:(void (^)(ConnectState state))completionHandler {
     self.getNetworkStateCompletionBlock = completionHandler;
     
-    if (SYSTEM_VERSION_LESS_THAN(@"12.0")) {
-        [self connectStateByReachability];
-    } else {
+    if (@available(iOS 12.0, *)) {
         [self connectStateByNetwork];
+    } else {
+        [self connectStateByReachability];
     }
 }
 
