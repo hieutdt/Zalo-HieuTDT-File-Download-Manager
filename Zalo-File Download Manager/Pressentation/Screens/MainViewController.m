@@ -75,40 +75,44 @@
     
     __weak MainViewController *weakSelf = self;
     _progressHandler = ^(NSString *url, long long bytesWritten, long long totalBytes) {
-        NSMutableArray<FileDownloadViewModel *> *hashMapObject = [weakSelf.urlHashMap objectForKey:url];
-        if (hashMapObject) {
-            for (int i = 0; i < hashMapObject.count; i++) {
-                int index = (int)[weakSelf.fileViewModels indexOfObject:hashMapObject[i]];
-                if (weakSelf.fileViewModels[index].state == FileDownloading) {
-                    [weakSelf updateCellAtIndex:index
-                                      withState:FileDownloading
-                                   bytesWritten:bytesWritten
-                                     totalBytes:totalBytes];
-                }
-            }
-        }
-    };
-    
-    _completionHandler = ^(NSString *url, NSString *locationPath, NSError *error) {
-        NSMutableArray<FileDownloadViewModel *> *hashMapObject = [weakSelf.urlHashMap objectForKey:url];
-        if (hashMapObject) {
-            for (int i = 0; i < hashMapObject.count; i++) {
-                int index = (int)[weakSelf.fileViewModels indexOfObject:hashMapObject[i]];
-                if (weakSelf.fileViewModels[index].state == FileDownloading) {
-                    if (error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSMutableArray<FileDownloadViewModel *> *hashMapObject = [weakSelf.urlHashMap objectForKey:url];
+            if (hashMapObject) {
+                for (int i = 0; i < hashMapObject.count; i++) {
+                    int index = (int)[weakSelf.fileViewModels indexOfObject:hashMapObject[i]];
+                    if (weakSelf.fileViewModels[index].state == FileDownloading) {
                         [weakSelf updateCellAtIndex:index
-                                          withState:FileDownloadCancel
-                                       bytesWritten:weakSelf.fileViewModels[index].bytesWritten
-                                         totalBytes:weakSelf.fileViewModels[index].totalBytes];
-                    } else {
-                        [weakSelf updateCellAtIndex:index
-                                          withState:FileDownloadFinish
-                                       bytesWritten:weakSelf.fileViewModels[index].bytesWritten
-                                         totalBytes:weakSelf.fileViewModels[index].totalBytes];
+                                          withState:FileDownloading
+                                       bytesWritten:bytesWritten
+                                         totalBytes:totalBytes];
                     }
                 }
             }
-        }
+        });
+    };
+    
+    _completionHandler = ^(NSString *url, NSString *locationPath, NSError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSMutableArray<FileDownloadViewModel *> *hashMapObject = [weakSelf.urlHashMap objectForKey:url];
+            if (hashMapObject) {
+                for (int i = 0; i < hashMapObject.count; i++) {
+                    int index = (int)[weakSelf.fileViewModels indexOfObject:hashMapObject[i]];
+                    if (weakSelf.fileViewModels[index].state == FileDownloading) {
+                        if (error) {
+                            [weakSelf updateCellAtIndex:index
+                                              withState:FileDownloadCancel
+                                           bytesWritten:weakSelf.fileViewModels[index].bytesWritten
+                                             totalBytes:weakSelf.fileViewModels[index].totalBytes];
+                        } else {
+                            [weakSelf updateCellAtIndex:index
+                                              withState:FileDownloadFinish
+                                           bytesWritten:weakSelf.fileViewModels[index].bytesWritten
+                                             totalBytes:weakSelf.fileViewModels[index].totalBytes];
+                        }
+                    }
+                }
+            }
+        });
     };
     
     [self initAndLayoutView];
