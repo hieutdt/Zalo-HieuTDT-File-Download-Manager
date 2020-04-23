@@ -74,8 +74,10 @@
     _isScrolling = NO;
     
     __weak MainViewController *weakSelf = self;
+    dispatch_queue_t serialQueue = dispatch_queue_create("MainViewSerialQueue", DISPATCH_QUEUE_SERIAL);
+    
     _progressHandler = ^(NSString *url, long long bytesWritten, long long totalBytes) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+        dispatch_async(serialQueue, ^{
             NSMutableArray<FileDownloadViewModel *> *hashMapObject = [weakSelf.urlHashMap objectForKey:url];
             if (hashMapObject) {
                 for (int i = 0; i < hashMapObject.count; i++) {
@@ -92,7 +94,7 @@
     };
     
     _completionHandler = ^(NSString *url, NSString *locationPath, NSError *error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+        dispatch_async(serialQueue, ^{
             NSMutableArray<FileDownloadViewModel *> *hashMapObject = [weakSelf.urlHashMap objectForKey:url];
             if (hashMapObject) {
                 for (int i = 0; i < hashMapObject.count; i++) {
